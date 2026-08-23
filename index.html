@@ -2,14 +2,14 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>คำนวณแคลอรี่ - Calorie Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Calorie Tracker - ดูแลสุขภาพ</title>
     
     <!-- PWA Manifest -->
     <link rel="manifest" id="manifest-placeholder">
     <meta name="theme-color" content="#4CAF50">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Calorie Tracker">
     <link rel="apple-touch-icon" id="apple-touch-icon-placeholder">
     
@@ -18,585 +18,962 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: 'Sarabun', 'TH Sarabun New', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, 'Sarabun', 'TH Sarabun New', sans-serif;
+            background: #f0f2f5;
             min-height: 100vh;
-            padding: 20px;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        .container {
-            max-width: 800px;
+        /* ===== APP SHELL ===== */
+        .app-shell {
+            max-width: 480px;
             margin: 0 auto;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #f0f2f5;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
             background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border-bottom: 1px solid #f0f0f0;
+            flex-shrink: 0;
+            z-index: 10;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
         }
 
-        h1 {
+        .app-header h1 {
+            font-size: 18px;
             color: #333;
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 2em;
+            margin: 0;
         }
 
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
+        .app-header .badge {
+            background: #4CAF50;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
         }
 
+        /* ===== PAGE CONTAINER ===== */
+        .page-container {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .page-wrapper {
+            display: flex;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+            will-change: transform;
+        }
+
+        .page {
+            min-width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 12px 12px 80px 12px;
+            -webkit-overflow-scrolling: touch;
+            background: #f0f2f5;
+        }
+
+        .page::-webkit-scrollbar {
+            width: 3px;
+        }
+        .page::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
+        }
+
+        /* ===== BOTTOM NAV ===== */
+        .bottom-nav {
+            display: flex;
+            background: white;
+            border-top: 1px solid #f0f0f0;
+            flex-shrink: 0;
+            padding: 4px 0 env(safe-area-inset-bottom, 4px) 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
+            z-index: 20;
+            position: sticky;
+            bottom: 0;
+        }
+
+        .bottom-nav button {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 0;
+            border: none;
+            background: transparent;
+            font-size: 10px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+            touch-action: manipulation;
+            position: relative;
+            gap: 1px;
+            min-height: 52px;
+        }
+
+        .bottom-nav button .nav-icon {
+            font-size: 20px;
+            line-height: 1.2;
+        }
+
+        .bottom-nav button .nav-label {
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .bottom-nav button.active {
+            color: #4CAF50;
+        }
+
+        .bottom-nav button.active .nav-icon {
+            transform: scale(1.05);
+        }
+
+        .bottom-nav button:active {
+            transform: scale(0.92);
+        }
+
+        .bottom-nav .nav-badge {
+            position: absolute;
+            top: 2px;
+            right: 50%;
+            transform: translateX(calc(50% + 12px));
+            background: #ff6b6b;
+            color: white;
+            font-size: 9px;
+            padding: 1px 6px;
+            border-radius: 10px;
+            font-weight: 700;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        /* ===== SECTION STYLES ===== */
         .section {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
+            background: white;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            border: 1px solid #f0f0f0;
         }
 
         .section h2 {
-            color: #4CAF50;
-            margin-bottom: 15px;
-            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .form-group {
-            margin-bottom: 15px;
-            position: relative;
+            margin-bottom: 10px;
         }
 
         label {
             display: block;
-            margin-bottom: 5px;
-            color: #555;
+            margin-bottom: 3px;
+            color: #666;
             font-weight: 500;
+            font-size: 13px;
         }
 
         input, select {
             width: 100%;
-            padding: 10px;
+            padding: 10px 12px;
             border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 10px;
+            font-size: 14px;
             transition: border-color 0.3s;
+            background: white;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         input:focus, select:focus {
             outline: none;
             border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.12);
         }
 
-        button {
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+        }
+
+        .btn {
             background: #4CAF50;
             color: white;
-            padding: 12px 24px;
+            padding: 12px 16px;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.15s;
             width: 100%;
+            touch-action: manipulation;
         }
 
-        button:hover {
-            background: #45a049;
+        .btn:active {
+            transform: scale(0.97);
+            background: #43a047;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        .btn-secondary:active {
+            background: #e0e0e0;
+        }
+
+        .btn-sm {
+            padding: 8px 14px;
+            font-size: 13px;
+            width: auto;
+            border-radius: 8px;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+        }
+        .btn-danger:active {
+            background: #e55a5a;
         }
 
         .result-box {
             background: #e8f5e9;
             border-radius: 10px;
-            padding: 15px;
-            margin-top: 15px;
+            padding: 14px;
+            margin-top: 10px;
             text-align: center;
         }
-
-        .result-box.warning {
-            background: #fff3e0;
-        }
-
-        .result-box.danger {
-            background: #ffebee;
-        }
-
-        .result-box h3 {
-            color: #333;
-            margin-bottom: 10px;
-        }
+        .result-box.warning { background: #fff3e0; }
+        .result-box.danger { background: #ffebee; }
 
         .result-box .calories {
             font-size: 2em;
             color: #4CAF50;
             font-weight: bold;
         }
+        .result-box .calories.danger { color: #f44336; }
 
+        /* Food List */
         .food-list {
             list-style: none;
         }
-
         .food-item {
             background: white;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 6px;
+            border-radius: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 1px solid #f0f0f0;
         }
-
         .food-item .delete-btn {
-            background: #f44336;
+            background: #ff6b6b;
             color: white;
             border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            width: auto;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            touch-action: manipulation;
         }
+        .food-item .delete-btn:active { transform: scale(0.95); }
 
+        /* Progress */
         .progress-bar {
             width: 100%;
-            height: 20px;
+            height: 8px;
             background: #e0e0e0;
             border-radius: 10px;
             overflow: hidden;
-            margin: 10px 0;
+            margin: 8px 0;
         }
-
         .progress-fill {
             height: 100%;
             background: #4CAF50;
-            transition: width 0.3s, background 0.3s;
+            transition: width 0.5s ease;
+            border-radius: 10px;
         }
+        .progress-fill.warning { background: #ff9800; }
+        .progress-fill.danger { background: #f44336; }
 
-        .progress-fill.warning {
-            background: #ff9800;
-        }
-
-        .progress-fill.danger {
-            background: #f44336;
-        }
-
-        .stats {
+        /* Stats */
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 20px;
+            gap: 6px;
+            margin-top: 10px;
         }
-
         .stat-card {
             background: white;
-            padding: 15px;
+            padding: 10px 6px;
             border-radius: 10px;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 1px solid #f0f0f0;
         }
-
         .stat-card .value {
-            font-size: 1.5em;
+            font-size: 1.2em;
             font-weight: bold;
             color: #333;
         }
-
         .stat-card .label {
-            color: #666;
-            font-size: 0.9em;
+            color: #999;
+            font-size: 10px;
         }
 
+        /* Dashboard Grid */
+        .dash-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+        .dash-card {
+            background: white;
+            border-radius: 10px;
+            padding: 10px 4px;
+            text-align: center;
+            border: 1px solid #f0f0f0;
+        }
+        .dash-card b {
+            display: block;
+            font-size: 1.1em;
+            margin: 1px 0;
+        }
+        .dash-card small {
+            font-size: 9px;
+            color: #999;
+        }
+
+        /* Water */
+        .water-row {
+            display: flex;
+            gap: 8px;
+            margin: 6px 0;
+        }
+        .water-row button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            touch-action: manipulation;
+        }
+        .water-row button:first-child { background: #4CAF50; color: white; }
+        .water-row button:first-child:active { background: #43a047; }
+        .water-row button:last-child { background: #ff6b6b; color: white; }
+        .water-row button:last-child:active { background: #e55a5a; }
+
+        /* Two col */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        /* Macro */
+        .macro-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .macro-grid div {
+            background: white;
+            border-radius: 10px;
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #f0f0f0;
+        }
+        .macro-grid b {
+            display: block;
+            font-size: 1em;
+        }
+        .macro-grid small {
+            font-size: 10px;
+            color: #999;
+        }
+
+        /* Chart */
+        .chart {
+            height: 80px;
+            display: flex;
+            align-items: end;
+            gap: 4px;
+            padding: 4px 0;
+            border-bottom: 2px solid #eee;
+        }
+        .bar {
+            flex: 1;
+            background: #4CAF50;
+            border-radius: 4px 4px 0 0;
+            min-height: 4px;
+            position: relative;
+            transition: height 0.5s ease;
+        }
+        .bar span {
+            position: absolute;
+            bottom: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 8px;
+            color: #999;
+        }
+
+        .tip-box {
+            margin-top: 8px;
+            background: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .exercise-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 10px;
+            margin-top: 4px;
+            border: 1px solid #f0f0f0;
+        }
+        .exercise-item button {
+            padding: 4px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+            border: none;
+            background: #ff6b6b;
+            color: white;
+            touch-action: manipulation;
+        }
+        .exercise-item button:active { transform: scale(0.95); }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 12px 0;
+            font-size: 13px;
+        }
+
+        /* Quick add */
+        .quick-add {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin: 6px 0 8px 0;
+        }
+        .quick-add button {
+            padding: 5px 10px;
+            border-radius: 16px;
+            border: 1px solid #ddd;
+            background: white;
+            font-size: 11px;
+            color: #555;
+            touch-action: manipulation;
+        }
+        .quick-add button:active { background: #f0f0f0; }
+
+        /* Search */
+        .food-input-wrapper {
+            position: relative;
+        }
         .search-results {
             position: absolute;
             background: white;
             border: 1px solid #ddd;
-            border-radius: 8px;
-            max-height: 200px;
+            border-radius: 10px;
+            max-height: 160px;
             overflow-y: auto;
             width: 100%;
-            z-index: 1000;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-top: 2px;
         }
-
         .search-result-item {
-            padding: 10px;
+            padding: 8px 12px;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: background 0.2s;
+            border-bottom: 1px solid #f5f5f5;
+            touch-action: manipulation;
         }
-
-        .search-result-item:hover {
-            background: #f0f0f0;
-        }
-
-        .food-calories {
+        .search-result-item:active { background: #f0f0f0; }
+        .search-result-item .food-calories {
             color: #4CAF50;
             font-weight: bold;
+            font-size: 13px;
         }
 
-        .no-result {
-            padding: 10px;
-            color: #999;
-            text-align: center;
-        }
-
-        /* ปุ่มล้างข้อมูล */
-        .clear-btn {
-            background: #ff9800;
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-            margin-top: 10px;
-            width: auto;
-        }
-
-        .clear-btn:hover {
-            background: #f57c00;
-        }
-
-        /* Popup ติดตั้งแอพ */
+        /* Install Popup */
         .install-popup {
             display: none;
             position: fixed;
-            bottom: 20px;
+            bottom: 70px;
             left: 50%;
             transform: translateX(-50%);
             background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 16px 20px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.2);
             z-index: 9999;
             max-width: 90%;
-            width: 400px;
+            width: 340px;
             text-align: center;
         }
-
-        .install-popup.show {
-            display: block;
-            animation: slideUp 0.5s ease;
-        }
-
+        .install-popup.show { display: block; animation: slideUp 0.4s ease; }
         @keyframes slideUp {
-            from {
-                transform: translate(-50%, 100%);
-                opacity: 0;
-            }
-            to {
-                transform: translate(-50%, 0);
-                opacity: 1;
-            }
+            from { transform: translate(-50%, 100%); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
         }
-
-        .install-popup h3 {
-            color: #333;
-            margin-bottom: 10px;
+        .install-popup h3 { font-size: 16px; margin-bottom: 4px; }
+        .install-popup p { font-size: 13px; color: #666; margin-bottom: 12px; }
+        .install-popup .btn-row { display: flex; gap: 8px; }
+        .install-popup .btn-row button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            touch-action: manipulation;
         }
+        .install-popup .install-btn { background: #4CAF50; color: white; }
+        .install-popup .install-btn:active { background: #43a047; }
+        .install-popup .cancel-btn { background: #f0f0f0; color: #333; }
+        .install-popup .cancel-btn:active { background: #e0e0e0; }
 
-        .install-popup p {
-            color: #666;
-            margin-bottom: 15px;
-        }
-
-        .install-popup .install-btn {
-            background: #4CAF50;
+        /* Clear button */
+        .clear-btn {
+            background: #ff9800;
             color: white;
-            padding: 10px 20px;
+            padding: 8px 14px;
             border: none;
             border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            margin: 5px;
-            width: auto;
+            font-size: 13px;
+            touch-action: manipulation;
         }
+        .clear-btn:active { transform: scale(0.95); }
 
-        .install-popup .cancel-btn {
-            background: #f44336;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            margin: 5px;
-            width: auto;
+        /* Scrollbar hide */
+        .page::-webkit-scrollbar { width: 3px; }
+        .page::-webkit-scrollbar-track { background: transparent; }
+        .page::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .page { padding: 8px 8px 70px 8px; }
+            .section { padding: 12px; }
+            .dash-grid { grid-template-columns: repeat(4, 1fr); gap: 4px; }
+            .dash-card { padding: 8px 2px; }
+            .dash-card b { font-size: 0.95em; }
+            .stats-grid { gap: 4px; }
+            .stat-card { padding: 8px 4px; }
+            .stat-card .value { font-size: 1em; }
+            .two-col { grid-template-columns: 1fr; }
+            .bottom-nav button { min-height: 46px; padding: 4px 0; }
+            .bottom-nav button .nav-icon { font-size: 18px; }
         }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 15px;
-            }
-            
-            .stats {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width: 380px) {
+            .dash-grid { grid-template-columns: repeat(2, 1fr); }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🍎 เครื่องคำนวณแคลอรี่</h1>
-        <p class="subtitle">คำนวณแคลอรี่ที่ควรได้รับในแต่ละวัน</p>
+    <div class="app-shell">
+        <!-- HEADER -->
+        <header class="app-header">
+            <h1>🍎 Calorie Tracker</h1>
+            <span class="badge" id="dateBadge">วันนี้</span>
+        </header>
 
-        <!-- ส่วนคำนวณ BMR -->
-        <div class="section">
-            <h2>📊 ข้อมูลส่วนตัว</h2>
-            <div class="form-group">
-                <label>เพศ</label>
-                <select id="gender">
-                    <option value="male">ชาย</option>
-                    <option value="female">หญิง</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>อายุ (ปี)</label>
-                <input type="number" id="age" value="30" min="1" max="120">
-            </div>
-            <div class="form-group">
-                <label>น้ำหนัก (กิโลกรัม)</label>
-                <input type="number" id="weight" value="65" min="1" max="300">
-            </div>
-            <div class="form-group">
-                <label>ส่วนสูง (เซนติเมตร)</label>
-                <input type="number" id="height" value="170" min="50" max="250">
-            </div>
-            <div class="form-group">
-                <label>ระดับกิจกรรม</label>
-                <select id="activity">
-                    <option value="1.2">นั่งทำงานเป็นส่วนใหญ่ (ไม่ค่อยออกกำลังกาย)</option>
-                    <option value="1.375">ออกกำลังกายเบาๆ 1-3 วัน/สัปดาห์</option>
-                    <option value="1.55">ออกกำลังกายปานกลาง 3-5 วัน/สัปดาห์</option>
-                    <option value="1.725">ออกกำลังกายหนัก 6-7 วัน/สัปดาห์</option>
-                    <option value="1.9">ออกกำลังกายหนักมาก/ทำงานใช้แรงงาน</option>
-                </select>
-            </div>
-            <button onclick="calculateBMR()">คำนวณแคลอรี่ที่ควรได้รับ</button>
-            
-            <div id="bmrResult" style="display: none;">
-                <div class="result-box">
-                    <h3>แคลอรี่ที่ควรได้รับต่อวัน</h3>
-                    <div class="calories" id="dailyCalories">0</div>
-                    <p>กิโลแคลอรี่/วัน</p>
+        <!-- PAGE CONTAINER -->
+        <div class="page-container">
+            <div class="page-wrapper" id="pageWrapper">
+
+                <!-- PAGE 0: DASHBOARD -->
+                <div class="page" id="page-dash">
+                    <div class="section">
+                        <h2>✨ สรุปวันนี้</h2>
+                        <div class="dash-grid">
+                            <div class="dash-card">🔥<b id="hCal">0</b><small>kcal</small></div>
+                            <div class="dash-card">🎯<b id="hRemain">-</b><small>เหลือ</small></div>
+                            <div class="dash-card">💧<b id="hWater">0</b><small>แก้ว</small></div>
+                            <div class="dash-card">🏃<b id="hBurn">0</b><small>เผาผลาญ</small></div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="dashProgress" style="width:0%"></div>
+                        </div>
+                        <div class="tip-box" id="dashTip">💡 เริ่มบันทึกอาหารมื้อแรกของคุณ</div>
+                    </div>
+
+                    <div class="section">
+                        <h2>📊 สถิติ</h2>
+                        <div class="stats-grid">
+                            <div class="stat-card"><div class="value" id="statConsumed">0</div><div class="label">ทานไปแล้ว</div></div>
+                            <div class="stat-card"><div class="value" id="statRemaining">0</div><div class="label">เหลือ</div></div>
+                            <div class="stat-card"><div class="value" id="statPct">0%</div><div class="label">ของเป้าหมาย</div></div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>🎯 เป้าหมายสุขภาพ</h2>
+                        <select id="hGoal" style="margin-bottom:6px;">
+                            <option value="maintain">รักษาน้ำหนัก</option>
+                            <option value="lose">ลดน้ำหนัก (-500 kcal)</option>
+                            <option value="gain">เพิ่มน้ำหนัก (+300 kcal)</option>
+                        </select>
+                        <button class="btn btn-secondary" onclick="applyHealthGoal()" style="margin-bottom:6px;">ปรับเป้าหมายอัตโนมัติ</button>
+                        <div class="macro-grid">
+                            <div>🥩<b id="hProtein">0g</b><small>โปรตีน</small></div>
+                            <div>🍚<b id="hCarb">0g</b><small>คาร์บ</small></div>
+                            <div>🥑<b id="hFat">0g</b><small>ไขมัน</small></div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>📈 แนวโน้ม 7 วัน</h2>
+                        <div class="chart" id="hChart"></div>
+                        <div class="stats-grid" style="margin-top:10px;">
+                            <div class="stat-card"><div class="value" id="hStreak">0</div><div class="label">🔥 วันต่อเนื่อง</div></div>
+                            <div class="stat-card"><div class="value" id="hScore">0</div><div class="label">⭐ คะแนนสุขภาพ</div></div>
+                            <div class="stat-card"><div class="value"><button class="btn-sm btn-secondary" onclick="backupHealth()">💾 Export</button></div><div class="label">สำรองข้อมูล</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 1: FOOD -->
+                <div class="page" id="page-food">
+                    <div class="section">
+                        <h2>👤 ข้อมูลส่วนตัว</h2>
+                        <div class="form-group">
+                            <label>เพศ</label>
+                            <select id="gender">
+                                <option value="male">ชาย</option>
+                                <option value="female">หญิง</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>อายุ (ปี)</label>
+                            <input type="number" id="age" value="30" min="1" max="120">
+                        </div>
+                        <div class="form-group">
+                            <label>น้ำหนัก (กก.)</label>
+                            <input type="number" id="weight" value="65" min="1" max="300">
+                        </div>
+                        <div class="form-group">
+                            <label>ส่วนสูง (ซม.)</label>
+                            <input type="number" id="height" value="170" min="50" max="250">
+                        </div>
+                        <div class="form-group">
+                            <label>ระดับกิจกรรม</label>
+                            <select id="activity">
+                                <option value="1.2">นั่งทำงานเป็นส่วนใหญ่</option>
+                                <option value="1.375">ออกกำลังกายเบา 1-3 วัน</option>
+                                <option value="1.55">ออกกำลังกายปานกลาง 3-5 วัน</option>
+                                <option value="1.725">ออกกำลังกายหนัก 6-7 วัน</option>
+                                <option value="1.9">ออกกำลังกายหนักมาก</option>
+                            </select>
+                        </div>
+                        <button class="btn" onclick="calculateBMR()">คำนวณแคลอรี่ที่ควรได้รับ</button>
+                        <div id="bmrResult" style="display:none; margin-top:10px;">
+                            <div class="result-box">
+                                <h3 style="font-size:13px;color:#666;">แคลอรี่ที่ควรได้รับต่อวัน</h3>
+                                <div class="calories" id="dailyCalories">0</div>
+                                <p style="font-size:12px;color:#666;">กิโลแคลอรี่/วัน</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>🍽️ บันทึกอาหาร</h2>
+                        <div class="food-input-wrapper">
+                            <div class="form-group" style="margin-bottom:6px;">
+                                <label>ชื่ออาหาร</label>
+                                <input type="text" id="foodName" placeholder="พิมพ์ชื่ออาหาร..." autocomplete="off">
+                                <div id="searchResults" class="search-results" style="display:none;"></div>
+                            </div>
+                            <div class="form-group" style="margin-bottom:6px;">
+                                <label>แคลอรี่ (kcal)</label>
+                                <input type="number" id="foodCalories" placeholder="แคลอรี่" min="0">
+                            </div>
+                        </div>
+                        <div class="quick-add">
+                            <button onclick="quickAdd('ข้าวผัด', 350)">🍚 ข้าวผัด</button>
+                            <button onclick="quickAdd('ก๋วยเตี๋ยว', 350)">🍜 ก๋วยเตี๋ยว</button>
+                            <button onclick="quickAdd('ไข่เจียว', 200)">🍳 ไข่เจียว</button>
+                            <button onclick="quickAdd('ผลไม้', 80)">🍎 ผลไม้</button>
+                            <button onclick="quickAdd('น้ำอัดลม', 150)">🥤 น้ำอัดลม</button>
+                            <button onclick="quickAdd('ไก่ทอด', 350)">🍗 ไก่ทอด</button>
+                        </div>
+                        <button class="btn" onclick="addFood()">➕ เพิ่มอาหาร</button>
+                    </div>
+
+                    <div class="section">
+                        <h2>📋 รายการอาหารวันนี้</h2>
+                        <ul class="food-list" id="foodList"></ul>
+                        <div id="totalCaloriesBox" style="display:none; margin-top:8px;">
+                            <div class="result-box">
+                                <h3 style="font-size:13px;color:#666;">รวมแคลอรี่ที่ทานไปแล้ว</h3>
+                                <div class="calories" id="totalCalories">0</div>
+                                <p style="font-size:12px;color:#666;">กิโลแคลอรี่</p>
+                            </div>
+                        </div>
+                        <button class="clear-btn" onclick="clearAllData()" style="margin-top:8px;width:100%;">🗑️ ล้างข้อมูลทั้งหมด</button>
+                    </div>
+                </div>
+
+                <!-- PAGE 2: WATER -->
+                <div class="page" id="page-water">
+                    <div class="section">
+                        <h2>💧 ติดตามการดื่มน้ำ</h2>
+                        <div class="water-row">
+                            <button onclick="water(1)">+ 1 แก้ว</button>
+                            <button onclick="water(-1)">− 1 แก้ว</button>
+                        </div>
+                        <div id="waterIcons" style="font-size:26px;text-align:center;margin:8px 0;"></div>
+                        <p style="text-align:center;font-size:14px;color:#666;">เป้าหมาย <b id="waterTarget">8</b> แก้ว/วัน</p>
+                        <div class="stats-grid" style="margin-top:10px;">
+                            <div class="stat-card"><div class="value" id="waterToday">0</div><div class="label">วันนี้</div></div>
+                            <div class="stat-card"><div class="value" id="waterAvg">0</div><div class="label">เฉลี่ย 7 วัน</div></div>
+                            <div class="stat-card"><div class="value" id="waterBest">0</div><div class="label">สูงสุด</div></div>
+                        </div>
+                    </div>
+                    <div class="section">
+                        <h2>📊 ประวัติการดื่มน้ำ</h2>
+                        <div id="waterHistory" style="font-size:13px;color:#666;"></div>
+                    </div>
+                </div>
+
+                <!-- PAGE 3: EXERCISE -->
+                <div class="page" id="page-exercise">
+                    <div class="section">
+                        <h2>🏃 บันทึกการออกกำลังกาย</h2>
+                        <div class="two-col">
+                            <select id="exType">
+                                <option>เดินเร็ว</option>
+                                <option>วิ่ง</option>
+                                <option>ปั่นจักรยาน</option>
+                                <option>เวทเทรนนิ่ง</option>
+                                <option>โยคะ</option>
+                                <option>ว่ายน้ำ</option>
+                                <option>เต้นแอโรบิก</option>
+                            </select>
+                            <input id="exMin" type="number" value="30" min="1" placeholder="นาที">
+                        </div>
+                        <button class="btn" onclick="addEx()" style="margin-top:8px;">➕ เพิ่มกิจกรรม</button>
+                    </div>
+
+                    <div class="section">
+                        <h2>📋 กิจกรรมวันนี้</h2>
+                        <div id="exList"></div>
+                        <div class="stats-grid" style="margin-top:10px;">
+                            <div class="stat-card"><div class="value" id="exTotal">0</div><div class="label">นาทีทั้งหมด</div></div>
+                            <div class="stat-card"><div class="value" id="exBurn">0</div><div class="label">แคลอรี่เผาผลาญ</div></div>
+                            <div class="stat-card"><div class="value" id="exSessions">0</div><div class="label">ครั้ง</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 4: HISTORY -->
+                <div class="page" id="page-history">
+                    <div class="section">
+                        <h2>📈 ประวัติย้อนหลัง</h2>
+                        <div id="historyList" style="margin-top:6px;"></div>
+                    </div>
+                    <div class="section">
+                        <h2>📊 สถิติรวม</h2>
+                        <div class="stats-grid">
+                            <div class="stat-card"><div class="value" id="totalDays">0</div><div class="label">วันบันทึก</div></div>
+                            <div class="stat-card"><div class="value" id="avgCal">0</div><div class="label">เฉลี่ย kcal/วัน</div></div>
+                            <div class="stat-card"><div class="value" id="bestDay">0</div><div class="label">วันสูงสุด</div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- ส่วนบันทึกอาหาร -->
-        <div class="section">
-            <h2>🍽️ บันทึกอาหาร</h2>
-            <div class="form-group">
-                <label>ชื่ออาหาร (พิมพ์เพื่อค้นหา)</label>
-                <input type="text" id="foodName" placeholder="เช่น พิมพ์ 'ข้าว' เพื่อค้นหา" autocomplete="off">
-                <div id="searchResults" class="search-results" style="display: none;"></div>
-            </div>
-            <div class="form-group">
-                <label>จำนวนแคลอรี่ (กิโลแคลอรี่)</label>
-                <input type="number" id="foodCalories" placeholder="จะเติมอัตโนมัติเมื่อเลือกอาหาร" min="0">
-            </div>
-            <button onclick="addFood()">เพิ่มอาหาร</button>
-            
-            <div id="foodListContainer" style="margin-top: 20px;">
-                <h3>รายการอาหารวันนี้</h3>
-                <ul class="food-list" id="foodList"></ul>
-                <div class="result-box" id="totalCaloriesBox" style="display: none;">
-                    <h3>รวมแคลอรี่ที่ทานไปแล้ว</h3>
-                    <div class="calories" id="totalCalories">0</div>
-                    <p>กิโลแคลอรี่</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- สรุปผล -->
-        <div class="section" id="summarySection" style="display: none;">
-            <h2>📈 สรุปผลวันนี้</h2>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
-            </div>
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="value" id="statConsumed">0</div>
-                    <div class="label">ทานไปแล้ว (kcal)</div>
-                </div>
-                <div class="stat-card">
-                    <div class="value" id="statRemaining">0</div>
-                    <div class="label">เหลือ (kcal)</div>
-                </div>
-                <div class="stat-card">
-                    <div class="value" id="statPercentage">0%</div>
-                    <div class="label">ของเป้าหมาย</div>
-                </div>
-            </div>
-            <div id="summaryMessage" class="result-box" style="margin-top: 20px;"></div>
-        </div>
-
-        <!-- ปุ่มล้างข้อมูล -->
-        <div style="text-align: center; margin-top: 20px;">
-            <button class="clear-btn" onclick="clearAllData()">🗑️ ล้างข้อมูลทั้งหมด</button>
-        </div>
+        <!-- BOTTOM NAV -->
+        <nav class="bottom-nav" id="bottomNav">
+            <button class="active" data-page="0">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">แดชบอร์ด</span>
+            </button>
+            <button data-page="1">
+                <span class="nav-icon">🍽️</span>
+                <span class="nav-label">อาหาร</span>
+                <span class="nav-badge" id="foodBadge" style="display:none;">0</span>
+            </button>
+            <button data-page="2">
+                <span class="nav-icon">💧</span>
+                <span class="nav-label">น้ำ</span>
+            </button>
+            <button data-page="3">
+                <span class="nav-icon">🏃</span>
+                <span class="nav-label">ออกกำลัง</span>
+            </button>
+            <button data-page="4">
+                <span class="nav-icon">📈</span>
+                <span class="nav-label">ประวัติ</span>
+            </button>
+        </nav>
     </div>
 
-    <!-- Popup ติดตั้งแอพ -->
+    <!-- Install Popup -->
     <div id="installPopup" class="install-popup">
-        <h3>📱 ติดตั้งแอพ Calorie Tracker</h3>
-        <p>ติดตั้งแอพเพื่อใช้งานแบบเต็มประสิทธิภาพ แม้ไม่มีอินเทอร์เน็ต!</p>
-        <button class="install-btn" onclick="installApp()">ติดตั้งเลย</button>
-        <button class="cancel-btn" onclick="closeInstallPopup()">ไว้ทีหลัง</button>
+        <h3>📱 ติดตั้งแอพ</h3>
+        <p>ใช้งานได้แม้ไม่มีอินเทอร์เน็ต!</p>
+        <div class="btn-row">
+            <button class="install-btn" onclick="installApp()">ติดตั้ง</button>
+            <button class="cancel-btn" onclick="closeInstallPopup()">ไว้ก่อน</button>
+        </div>
     </div>
 
     <script>
-        // ข้อมูลอาหาร (เก็บใน LocalStorage)
+        // ============================================
+        // CORE DATA
+        // ============================================
         let foodList = [];
         let dailyCalorieTarget = 0;
         let deferredPrompt = null;
-        let userProfile = {
-            gender: 'male',
-            age: 30,
-            weight: 65,
-            height: 170,
-            activity: 1.2
-        };
+        let userProfile = { gender: 'male', age: 30, weight: 65, height: 170, activity: 1.2 };
+        let hp = JSON.parse(localStorage.getItem('healthPlus') || '{"date":"","water":0,"ex":[],"history":[]}');
+        let currentPage = 0;
 
-        // ฐานข้อมูลอาหารยอดนิยม (ชื่ออาหาร: แคลอรี่ต่อหน่วยบริโภค)
         const foodDatabase = {
-            // อาหารจานเดียว
-            "ข้าวผัดกุ้ง": 350,
-            "ข้าวผัดหมู": 400,
-            "ข้าวมันไก่": 550,
-            "ข้าวขาหมู": 600,
-            "ข้าวราดแกง": 450,
-            "ข้าวหน้าเป็ด": 500,
-            "ข้าวหมูแดง": 450,
-            "ข้าวหมูกรอบ": 550,
-            "ข้าวคลุกกะปิ": 500,
-            "ข้าวผัดกระเพรา": 400,
-            "ข้าวผัดคะน้า": 350,
-            "ข้าวต้ม": 200,
-            "โจ๊ก": 250,
-            "ก๋วยเตี๋ยว": 350,
-            "ก๋วยเตี๋ยวต้มยำ": 300,
-            "ก๋วยเตี๋ยวเย็นตาโฟ": 400,
-            "ผัดไทย": 450,
-            "ผัดซีอิ๊ว": 500,
-            "ส้มตำ": 150,
-            "ส้มตำปูปลาร้า": 200,
-            "ต้มยำกุ้ง": 200,
-            "แกงเขียวหวาน": 300,
-            "แกงมัสมั่น": 350,
-            "พะแนง": 350,
-            "ผัดกะเพรา": 250,
-            
-            // อาหารจานเดียว (Fast Food)
-            "เบอร์เกอร์": 500,
-            "พิซซ่า": 300,
-            "เฟรนช์ฟรายส์": 350,
-            "ไก่ทอด": 350,
-            "แซนวิช": 250,
-            "สปาเก็ตตี้": 400,
-            "มักกะโรนี": 350,
-            "สเต็ก": 500,
-            "ซูชิ": 300,
-            "ราเมน": 450,
-            
-            // อาหารเช้า
-            "ไข่เจียว": 200,
-            "ไข่ต้ม": 75,
-            "ไข่ดาว": 90,
-            "ไข่คน": 100,
-            "ขนมปัง": 80,
-            "ขนมปังปิ้ง": 150,
-            "ซีเรียล": 150,
-            "โยเกิร์ต": 100,
-            "นมสด": 120,
-            "กาแฟ": 100,
-            "ชา": 50,
-            
-            // ผลไม้
-            "แอปเปิ้ล": 95,
-            "กล้วย": 105,
-            "ส้ม": 60,
-            "องุ่น": 70,
-            "แตงโม": 46,
-            "มะม่วง": 60,
-            "มะละกอ": 55,
-            "สับปะรด": 50,
-            "ฝรั่ง": 68,
-            "ทุเรียน": 180,
-            "มังคุด": 73,
-            "เงาะ": 80,
-            
-            // เครื่องดื่ม
-            "น้ำเปล่า": 0,
-            "น้ำอัดลม": 150,
-            "น้ำผลไม้": 120,
-            "ชาไข่มุก": 350,
-            "กาแฟเย็น": 200,
-            "ชาเขียว": 180,
-            "นมช็อกโกแลต": 200,
-            "เบียร์": 150,
-            "ไวน์": 120,
-            
-            // ขนม
-            "ไอศครีม": 200,
-            "เค้ก": 350,
-            "คุกกี้": 80,
-            "ช็อกโกแลต": 150,
-            "ขนมไทย": 200,
-            "โดนัท": 250,
-            "มันฝรั่งทอด": 150,
-            
-            // อาหารอีสาน
-            "ลาบ": 200,
-            "น้ำตก": 200,
-            "ตำแตง": 100,
-            "ตำผลไม้": 120,
-            "ไก่ย่าง": 250,
-            "หมูย่าง": 300,
-            "ปลาเผา": 250,
-            
-            // อาหารเหนือ
-            "ข้าวซอย": 400,
-            "แกงฮังเล": 350,
-            "น้ำพริกหนุ่ม": 100,
-            "แคบหมู": 200,
-            "ไส้อั่ว": 250,
-            
-            // อาหารใต้
-            "แกงไตปลา": 300,
-            "ผัดสะตอ": 250,
-            "ไก่ทอดหาดใหญ่": 400,
-            "ข้าวยำ": 350,
-            
-            // อาหารญี่ปุ่น
-            "ข้าวหน้าปลา": 350,
-            "เทมปุระ": 400,
-            "โซบะ": 300,
-            "อุด้ง": 350
+            "ข้าวผัด": 350, "ข้าวมันไก่": 550, "ข้าวราดแกง": 450, "ก๋วยเตี๋ยว": 350,
+            "ผัดไทย": 450, "ส้มตำ": 150, "ต้มยำกุ้ง": 200, "แกงเขียวหวาน": 300,
+            "ไข่เจียว": 200, "ไข่ต้ม": 75, "ไข่ดาว": 90, "ขนมปัง": 80,
+            "แอปเปิ้ล": 95, "กล้วย": 105, "ส้ม": 60, "องุ่น": 70,
+            "แตงโม": 46, "มะม่วง": 60, "ทุเรียน": 180, "น้ำอัดลม": 150,
+            "ชาไข่มุก": 350, "กาแฟเย็น": 200, "เบียร์": 150, "ไอศครีม": 200,
+            "เค้ก": 350, "ช็อกโกแลต": 150, "เบอร์เกอร์": 500, "พิซซ่า": 300,
+            "ไก่ทอด": 350, "สเต็ก": 500, "ซูชิ": 300, "ราเมน": 450,
+            "ลาบ": 200, "ไก่ย่าง": 250, "ข้าวซอย": 400, "แกงฮังเล": 350,
+            "ข้าวหน้าเป็ด": 500, "ข้าวหมูแดง": 450, "ผัดกะเพรา": 250, "โจ๊ก": 250
         };
 
-        // โหลดข้อมูลจาก LocalStorage เมื่อเปิดแอพ
-        window.onload = function() {
-            loadAllData();
-            setupFoodSearch();
-            setupPWA();
-            setupAutoSave();
-        };
-
-        // ตั้งค่าระบบ Auto Save
-        function setupAutoSave() {
-            // บันทึกข้อมูลส่วนตัวอัตโนมัติเมื่อมีการเปลี่ยนแปลง
-            ['gender', 'age', 'weight', 'height', 'activity'].forEach(id => {
-                document.getElementById(id).addEventListener('change', function() {
-                    updateUserProfile();
-                    saveAllData();
-                });
-            });
+        // ============================================
+        // DATE HELPERS
+        // ============================================
+        function td() { return new Date().toISOString().slice(0, 10); }
+        function todayThai() {
+            return new Date().toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short' });
         }
 
-        // อัปเดตข้อมูลส่วนตัว
-        function updateUserProfile() {
+        // ============================================
+        // PAGE NAVIGATION
+        // ============================================
+        function goToPage(index) {
+            currentPage = index;
+            const wrapper = document.getElementById('pageWrapper');
+            wrapper.style.transform = `translateX(-${index * 100}%)`;
+            
+            document.querySelectorAll('.bottom-nav button').forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+
+            // Update badge
+            updateBadge();
+        }
+
+        function updateBadge() {
+            const badge = document.getElementById('foodBadge');
+            if (foodList.length > 0) {
+                badge.style.display = 'block';
+                badge.textContent = foodList.length;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // Bottom nav click
+        document.querySelectorAll('.bottom-nav button').forEach((btn, i) => {
+            btn.addEventListener('click', () => goToPage(i));
+        });
+
+        // Keyboard shortcut (optional)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && currentPage > 0) goToPage(currentPage - 1);
+            if (e.key === 'ArrowRight' && currentPage < 4) goToPage(currentPage + 1);
+        });
+
+        // ============================================
+        // SAVE / LOAD
+        // ============================================
+        function saveAllData() {
+            localStorage.setItem('calorieTrackerData', JSON.stringify({
+                foodList, dailyCalorieTarget, userProfile
+            }));
+        }
+
+        function loadAllData() {
+            const saved = localStorage.getItem('calorieTrackerData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                foodList = data.foodList || [];
+                dailyCalorieTarget = data.dailyCalorieTarget || 0;
+                userProfile = data.userProfile || userProfile;
+                document.getElementById('gender').value = userProfile.gender;
+                document.getElementById('age').value = userProfile.age;
+                document.getElementById('weight').value = userProfile.weight;
+                document.getElementById('height').value = userProfile.height;
+                document.getElementById('activity').value = userProfile.activity;
+                if (dailyCalorieTarget > 0) {
+                    document.getElementById('bmrResult').style.display = 'block';
+                    document.getElementById('dailyCalories').textContent = dailyCalorieTarget.toLocaleString();
+                }
+                updateFoodList();
+                updateBadge();
+            }
+        }
+
+        function saveHP() {
+            hp.date = td();
+            localStorage.setItem('healthPlus', JSON.stringify(hp));
+        }
+
+        // ============================================
+        // BMR CALC
+        // ============================================
+        function calculateBMR() {
             userProfile = {
                 gender: document.getElementById('gender').value,
                 age: parseInt(document.getElementById('age').value) || 30,
@@ -604,450 +981,425 @@
                 height: parseInt(document.getElementById('height').value) || 170,
                 activity: parseFloat(document.getElementById('activity').value) || 1.2
             };
-        }
-
-        // ตั้งค่า PWA
-        function setupPWA() {
-            // สร้าง Manifest แบบ Dynamic
-            const manifestData = {
-                name: "เครื่องคำนวณแคลอรี่",
-                short_name: "CalorieTracker",
-                description: "แอพคำนวณแคลอรี่ที่ควรได้รับในแต่ละวัน",
-                start_url: window.location.href,
-                display: "standalone",
-                background_color: "#ffffff",
-                theme_color: "#4CAF50",
-                icons: [
-                    {
-                        src: createIcon(192),
-                        sizes: "192x192",
-                        type: "image/png"
-                    },
-                    {
-                        src: createIcon(512),
-                        sizes: "512x512",
-                        type: "image/png"
-                    }
-                ]
-            };
-
-            // สร้าง Blob URL สำหรับ manifest
-            const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
-            const manifestURL = URL.createObjectURL(manifestBlob);
-            document.getElementById('manifest-placeholder').href = manifestURL;
-
-            // สร้าง Icon สำหรับ Apple Touch
-            const appleIcon = createIcon(192);
-            document.getElementById('apple-touch-icon-placeholder').href = appleIcon;
-
-            // ลงทะเบียน Service Worker
-            if ('serviceWorker' in navigator) {
-                // สร้าง Service Worker แบบ Inline
-                const swCode = `
-                    const CACHE_NAME = 'calorie-tracker-v1';
-                    const urlsToCache = [
-                        '${window.location.href}'
-                    ];
-
-                    self.addEventListener('install', event => {
-                        event.waitUntil(
-                            caches.open(CACHE_NAME)
-                                .then(cache => {
-                                    console.log('Opened cache');
-                                    return cache.addAll(urlsToCache);
-                                })
-                        );
-                    });
-
-                    self.addEventListener('activate', event => {
-                        event.waitUntil(
-                            caches.keys().then(cacheNames => {
-                                return Promise.all(
-                                    cacheNames.map(cacheName => {
-                                        if (cacheName !== CACHE_NAME) {
-                                            return caches.delete(cacheName);
-                                        }
-                                    })
-                                );
-                            })
-                        );
-                    });
-
-                    self.addEventListener('fetch', event => {
-                        event.respondWith(
-                            caches.match(event.request)
-                                .then(response => {
-                                    if (response) {
-                                        return response;
-                                    }
-                                    return fetch(event.request).then(
-                                        response => {
-                                            if (!response || response.status !== 200 || response.type !== 'basic') {
-                                                return response;
-                                            }
-                                            const responseToCache = response.clone();
-                                            caches.open(CACHE_NAME)
-                                                .then(cache => {
-                                                    cache.put(event.request, responseToCache);
-                                                });
-                                            return response;
-                                        }
-                                    );
-                                })
-                        );
-                    });
-                `;
-
-                const swBlob = new Blob([swCode], {type: 'application/javascript'});
-                const swURL = URL.createObjectURL(swBlob);
-                
-                navigator.serviceWorker.register(swURL)
-                    .then(registration => {
-                        console.log('Service Worker ลงทะเบียนสำเร็จ:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('Service Worker ลงทะเบียนล้มเหลว:', error);
-                    });
-            }
-
-            // ดักจับเหตุการณ์ beforeinstallprompt
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                
-                // แสดง Popup อัตโนมัติหลังจาก 3 วินาที
-                setTimeout(() => {
-                    if (!localStorage.getItem('installPromptShown')) {
-                        showInstallPopup();
-                    }
-                }, 3000);
-            });
-
-            // ตรวจสอบว่าแอพถูกติดตั้งแล้วหรือไม่
-            window.addEventListener('appinstalled', () => {
-                console.log('แอพถูกติดตั้งแล้ว');
-                closeInstallPopup();
-                localStorage.setItem('appInstalled', 'true');
-            });
-        }
-
-        // สร้าง Icon แบบ Canvas
-        function createIcon(size) {
-            const canvas = document.createElement('canvas');
-            canvas.width = size;
-            canvas.height = size;
-            const ctx = canvas.getContext('2d');
-            
-            // วาดพื้นหลัง
-            ctx.fillStyle = '#4CAF50';
-            ctx.fillRect(0, 0, size, size);
-            
-            // วาดรูปแอปเปิ้ล
-            ctx.fillStyle = '#FF5722';
-            ctx.beginPath();
-            ctx.arc(size * 0.5, size * 0.5, size * 0.3, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // วาดใบไม้
-            ctx.fillStyle = '#8BC34A';
-            ctx.beginPath();
-            ctx.ellipse(size * 0.5, size * 0.3, size * 0.1, size * 0.05, 0, 0, Math.PI * 2);
-            ctx.fill();
-            
-            return canvas.toDataURL('image/png');
-        }
-
-        // แสดง Popup ติดตั้ง
-        function showInstallPopup() {
-            if (!localStorage.getItem('appInstalled')) {
-                document.getElementById('installPopup').classList.add('show');
-                localStorage.setItem('installPromptShown', 'true');
-            }
-        }
-
-        // ปิด Popup
-        function closeInstallPopup() {
-            document.getElementById('installPopup').classList.remove('show');
-        }
-
-        // ติดตั้งแอพ
-        async function installApp() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const result = await deferredPrompt.userChoice;
-                if (result.outcome === 'accepted') {
-                    console.log('ผู้ใช้ยอมรับการติดตั้ง');
-                } else {
-                    console.log('ผู้ใช้ปฏิเสธการติดตั้ง');
-                }
-                deferredPrompt = null;
-            }
-            closeInstallPopup();
-        }
-
-        function calculateBMR() {
-            updateUserProfile();
-            
-            // คำนวณ BMR (Basal Metabolic Rate)
             let bmr;
             if (userProfile.gender === 'male') {
                 bmr = 88.362 + (13.397 * userProfile.weight) + (4.799 * userProfile.height) - (5.677 * userProfile.age);
             } else {
                 bmr = 447.593 + (9.247 * userProfile.weight) + (3.098 * userProfile.height) - (4.330 * userProfile.age);
             }
-
-            // คำนวณ TDEE (Total Daily Energy Expenditure)
             dailyCalorieTarget = Math.round(bmr * userProfile.activity);
-
-            // แสดงผล
             document.getElementById('bmrResult').style.display = 'block';
             document.getElementById('dailyCalories').textContent = dailyCalorieTarget.toLocaleString();
-            
-            // แสดงสรุป
-            document.getElementById('summarySection').style.display = 'block';
-            updateSummary();
             saveAllData();
+            refreshAll();
         }
 
-        // ตั้งค่าระบบค้นหาอาหาร
-        function setupFoodSearch() {
-            const foodNameInput = document.getElementById('foodName');
-            const searchResults = document.getElementById('searchResults');
-            
-            foodNameInput.addEventListener('input', function() {
-                const searchTerm = this.value.trim().toLowerCase();
-                
-                if (searchTerm.length === 0) {
-                    searchResults.style.display = 'none';
-                    document.getElementById('foodCalories').value = '';
-                    return;
-                }
-                
-                // ค้นหาอาหารที่ตรงกับคำค้น
-                const matches = Object.keys(foodDatabase)
-                    .filter(food => food.toLowerCase().includes(searchTerm))
-                    .slice(0, 10); // แสดงผลสูงสุด 10 รายการ
-                
-                if (matches.length > 0) {
-                    searchResults.innerHTML = '';
-                    matches.forEach(food => {
-                        const div = document.createElement('div');
-                        div.className = 'search-result-item';
-                        div.innerHTML = `
-                            <span>${food}</span>
-                            <span class="food-calories">${foodDatabase[food]} kcal</span>
-                        `;
-                        div.onclick = function() {
-                            document.getElementById('foodName').value = food;
-                            document.getElementById('foodCalories').value = foodDatabase[food];
-                            searchResults.style.display = 'none';
-                        };
-                        searchResults.appendChild(div);
-                    });
-                    searchResults.style.display = 'block';
-                } else {
-                    searchResults.innerHTML = '<div class="no-result">ไม่พบอาหารที่ค้นหา กรุณากรอกแคลอรี่เอง</div>';
-                    searchResults.style.display = 'block';
-                }
-            });
-            
-            // ซ่อนผลการค้นหาเมื่อคลิกที่อื่น
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('#foodName') && !e.target.closest('#searchResults')) {
-                    searchResults.style.display = 'none';
-                }
-            });
+        function applyHealthGoal() {
+            if (!dailyCalorieTarget) calculateBMR();
+            const g = document.getElementById('hGoal').value;
+            dailyCalorieTarget = Math.max(1200, dailyCalorieTarget + (g === 'lose' ? -500 : g === 'gain' ? 300 : 0));
+            document.getElementById('dailyCalories').textContent = dailyCalorieTarget.toLocaleString();
+            saveAllData();
+            refreshAll();
+        }
+
+        // ============================================
+        // FOOD
+        // ============================================
+        function quickAdd(name, calories) {
+            document.getElementById('foodName').value = name;
+            document.getElementById('foodCalories').value = calories;
+            addFood();
         }
 
         function addFood() {
-            const foodName = document.getElementById('foodName').value.trim();
-            const foodCalories = parseInt(document.getElementById('foodCalories').value);
-
-            if (!foodName || !foodCalories || foodCalories <= 0) {
-                alert('กรุณากรอกชื่ออาหารและจำนวนแคลอรี่ให้ถูกต้อง');
+            const name = document.getElementById('foodName').value.trim();
+            const cal = parseInt(document.getElementById('foodCalories').value);
+            if (!name || !cal || cal <= 0) {
+                alert('กรุณากรอกชื่อและแคลอรี่ให้ถูกต้อง');
                 return;
             }
-
-            // ตรวจสอบว่าเป็นอาหารในฐานข้อมูลหรือไม่
-            if (foodDatabase[foodName]) {
-                // ถ้าเป็นอาหารในฐานข้อมูล ใช้แคลอรี่จากฐานข้อมูล
-                foodList.push({
-                    name: foodName,
-                    calories: foodDatabase[foodName],
-                    timestamp: new Date().toISOString()
-                });
-            } else {
-                // ถ้าไม่ใช่ ใช้แคลอรี่ที่ผู้ใช้กรอกเอง
-                foodList.push({
-                    name: foodName,
-                    calories: foodCalories,
-                    timestamp: new Date().toISOString()
-                });
-            }
-
-            // เคลียร์ฟอร์ม
+            foodList.push({ name, calories: cal, timestamp: new Date().toISOString() });
             document.getElementById('foodName').value = '';
             document.getElementById('foodCalories').value = '';
             document.getElementById('searchResults').style.display = 'none';
-
             updateFoodList();
-            updateSummary();
             saveAllData();
+            refreshAll();
+            updateBadge();
         }
 
         function removeFood(index) {
             foodList.splice(index, 1);
             updateFoodList();
-            updateSummary();
             saveAllData();
+            refreshAll();
+            updateBadge();
         }
 
         function updateFoodList() {
-            const foodListElement = document.getElementById('foodList');
-            const totalCaloriesBox = document.getElementById('totalCaloriesBox');
-            
-            foodListElement.innerHTML = '';
-            
+            const el = document.getElementById('foodList');
+            const box = document.getElementById('totalCaloriesBox');
+            const totalEl = document.getElementById('totalCalories');
+            el.innerHTML = '';
             if (foodList.length === 0) {
-                foodListElement.innerHTML = '<li style="text-align: center; color: #999;">ยังไม่มีรายการอาหาร</li>';
-                totalCaloriesBox.style.display = 'none';
+                el.innerHTML = '<div class="empty-state">ยังไม่มีรายการอาหารวันนี้</div>';
+                box.style.display = 'none';
                 return;
             }
-
-            let totalCalories = 0;
-            
-            foodList.forEach((food, index) => {
+            let total = 0;
+            foodList.forEach((f, i) => {
+                total += f.calories;
                 const li = document.createElement('li');
                 li.className = 'food-item';
                 li.innerHTML = `
                     <div>
-                        <strong>${food.name}</strong>
-                        <br>
-                        <small style="color: #666;">${new Date(food.timestamp).toLocaleTimeString('th-TH')}</small>
+                        <strong style="font-size:14px;">${f.name}</strong>
+                        <br><small style="color:#999;font-size:10px;">${new Date(f.timestamp).toLocaleTimeString('th-TH', {hour:'2-digit',minute:'2-digit'})}</small>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span>${food.calories} kcal</span>
-                        <button class="delete-btn" onclick="removeFood(${index})">ลบ</button>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span style="font-weight:600;color:#4CAF50;font-size:14px;">${f.calories} kcal</span>
+                        <button class="delete-btn" onclick="removeFood(${i})">ลบ</button>
                     </div>
                 `;
-                foodListElement.appendChild(li);
-                totalCalories += food.calories;
+                el.appendChild(li);
             });
-
-            totalCaloriesBox.style.display = 'block';
-            document.getElementById('totalCalories').textContent = totalCalories.toLocaleString();
+            totalEl.textContent = total.toLocaleString();
+            box.style.display = 'block';
+            updateBadge();
         }
 
-        function updateSummary() {
-            if (dailyCalorieTarget === 0) return;
-
-            const totalConsumed = foodList.reduce((sum, food) => sum + food.calories, 0);
-            const remaining = dailyCalorieTarget - totalConsumed;
-            const percentage = Math.round((totalConsumed / dailyCalorieTarget) * 100);
-
-            document.getElementById('statConsumed').textContent = totalConsumed.toLocaleString();
-            document.getElementById('statRemaining').textContent = remaining.toLocaleString();
-            document.getElementById('statPercentage').textContent = percentage + '%';
-
-            // อัปเดต progress bar
-            const progressFill = document.getElementById('progressFill');
-            progressFill.style.width = Math.min(percentage, 100) + '%';
-            
-            // เปลี่ยนสีตามสถานะ
-            progressFill.className = 'progress-fill';
-            if (percentage > 100) {
-                progressFill.classList.add('danger');
-            } else if (percentage > 80) {
-                progressFill.classList.add('warning');
-            }
-
-            // แสดงข้อความสรุป
-            const summaryMessage = document.getElementById('summaryMessage');
-            if (totalConsumed === 0) {
-                summaryMessage.innerHTML = '<h3>ยังไม่ได้ทานอาหาร</h3><p>เริ่มบันทึกอาหารมื้อแรกของคุณเลย!</p>';
-                summaryMessage.className = 'result-box';
-            } else if (remaining > 0) {
-                summaryMessage.innerHTML = `<h3>✅ อยู่ในเกณฑ์ดี</h3><p>คุณทานไปแล้ว ${totalConsumed.toLocaleString()} kcal ยังเหลืออีก ${remaining.toLocaleString()} kcal</p>`;
-                summaryMessage.className = 'result-box';
-            } else if (remaining === 0) {
-                summaryMessage.innerHTML = '<h3>⚠️ พอดี</h3><p>คุณทานครบตามเป้าหมายแล้ว!</p>';
-                summaryMessage.className = 'result-box warning';
-            } else {
-                summaryMessage.innerHTML = `<h3>❌ เกินเป้าหมาย</h3><p>คุณทานเกินไป ${Math.abs(remaining).toLocaleString()} kcal ควรระวัง!</p>`;
-                summaryMessage.className = 'result-box danger';
-            }
-        }
-
-        // บันทึกข้อมูลทั้งหมดลง LocalStorage
-        function saveAllData() {
-            const data = {
-                foodList: foodList,
-                dailyCalorieTarget: dailyCalorieTarget,
-                userProfile: userProfile
-            };
-            localStorage.setItem('calorieTrackerData', JSON.stringify(data));
-        }
-
-        // โหลดข้อมูลทั้งหมดจาก LocalStorage
-        function loadAllData() {
-            const savedData = localStorage.getItem('calorieTrackerData');
-            if (savedData) {
-                const data = JSON.parse(savedData);
-                foodList = data.foodList || [];
-                dailyCalorieTarget = data.dailyCalorieTarget || 0;
-                userProfile = data.userProfile || userProfile;
-                
-                // โหลดข้อมูลส่วนตัวกลับไปที่ฟอร์ม
-                document.getElementById('gender').value = userProfile.gender;
-                document.getElementById('age').value = userProfile.age;
-                document.getElementById('weight').value = userProfile.weight;
-                document.getElementById('height').value = userProfile.height;
-                document.getElementById('activity').value = userProfile.activity;
-                
-                if (dailyCalorieTarget > 0) {
-                    document.getElementById('bmrResult').style.display = 'block';
-                    document.getElementById('dailyCalories').textContent = dailyCalorieTarget.toLocaleString();
-                    document.getElementById('summarySection').style.display = 'block';
-                    updateFoodList();
-                    updateSummary();
+        // ============================================
+        // SEARCH
+        // ============================================
+        function setupSearch() {
+            const input = document.getElementById('foodName');
+            const results = document.getElementById('searchResults');
+            input.addEventListener('input', function() {
+                const term = this.value.trim().toLowerCase();
+                if (term.length === 0) {
+                    results.style.display = 'none';
+                    document.getElementById('foodCalories').value = '';
+                    return;
                 }
-            }
+                const matches = Object.keys(foodDatabase)
+                    .filter(f => f.toLowerCase().includes(term))
+                    .slice(0, 8);
+                if (matches.length > 0) {
+                    results.innerHTML = matches.map(f => `
+                        <div class="search-result-item" onclick="selectFood('${f}')">
+                            <span>${f}</span>
+                            <span class="food-calories">${foodDatabase[f]} kcal</span>
+                        </div>
+                    `).join('');
+                    results.style.display = 'block';
+                } else {
+                    results.innerHTML = '<div class="search-result-item" style="color:#999;">ไม่พบอาหาร กรุณาใส่แคลอรี่เอง</div>';
+                    results.style.display = 'block';
+                }
+            });
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('#foodName') && !e.target.closest('#searchResults')) {
+                    results.style.display = 'none';
+                }
+            });
         }
 
-        // ล้างข้อมูลทั้งหมด
+        function selectFood(name) {
+            document.getElementById('foodName').value = name;
+            document.getElementById('foodCalories').value = foodDatabase[name];
+            document.getElementById('searchResults').style.display = 'none';
+        }
+
+        // ============================================
+        // WATER
+        // ============================================
+        function water(n) {
+            hp.water = Math.max(0, (hp.water || 0) + n);
+            saveHP();
+            refreshAll();
+        }
+
+        // ============================================
+        // EXERCISE
+        // ============================================
+        function addEx() {
+            const t = document.getElementById('exType').value;
+            const m = Math.max(1, parseInt(document.getElementById('exMin').value) || 0);
+            const burnMap = { 'เดินเร็ว': 5, 'วิ่ง': 10, 'ปั่นจักรยาน': 8, 'เวทเทรนนิ่ง': 6, 'โยคะ': 3, 'ว่ายน้ำ': 9, 'เต้นแอโรบิก': 7 };
+            const b = Math.round(m * (burnMap[t] || 5));
+            hp.ex.push({ t, m, b });
+            saveHP();
+            refreshAll();
+        }
+
+        function delEx(i) {
+            hp.ex.splice(i, 1);
+            saveHP();
+            refreshAll();
+        }
+
+        // ============================================
+        // REFRESH ALL
+        // ============================================
+        function refreshAll() {
+            // Reset day
+            if (hp.date !== td()) {
+                if (hp.date) hp.history.push({ d: hp.date, c: foodList.reduce((s, x) => s + x.calories, 0) });
+                hp.date = td();
+                hp.water = 0;
+                hp.ex = [];
+                saveHP();
+            }
+
+            const c = foodList.reduce((s, x) => s + x.calories, 0);
+            const b = hp.ex.reduce((s, x) => s + x.b, 0);
+            const wt = Math.round((userProfile.weight || 65) * 0.033 / 0.25);
+            const net = Math.max(0, c - b);
+
+            // === DASHBOARD ===
+            document.getElementById('hCal').textContent = c;
+            document.getElementById('hRemain').textContent = dailyCalorieTarget ? Math.max(0, dailyCalorieTarget - net) : '-';
+            document.getElementById('hWater').textContent = hp.water;
+            document.getElementById('hBurn').textContent = b;
+
+            const pct = dailyCalorieTarget ? Math.min(100, Math.round((net / dailyCalorieTarget) * 100)) : 0;
+            const prog = document.getElementById('dashProgress');
+            prog.style.width = pct + '%';
+            prog.className = 'progress-fill' + (pct > 100 ? ' danger' : pct > 80 ? ' warning' : '');
+
+            document.getElementById('statConsumed').textContent = c.toLocaleString();
+            document.getElementById('statRemaining').textContent = dailyCalorieTarget ? Math.max(0, dailyCalorieTarget - net).toLocaleString() : '-';
+            document.getElementById('statPct').textContent = pct + '%';
+
+            // Tip
+            const tip = document.getElementById('dashTip');
+            if (hp.water < wt / 2) tip.textContent = '💧 วันนี้ดื่มน้ำน้อย ลองจิบน้ำให้สม่ำเสมอ';
+            else if (b === 0) tip.textContent = '🏃 ลองเพิ่มกิจกรรมเบา ๆ เช่น เดินเร็ว 20 นาที';
+            else if (pct > 100) tip.textContent = '⚠️ คุณทานเกินเป้าหมาย ลองลดอาหารมื้อต่อไป';
+            else if (pct > 80) tip.textContent = '🌟 ใกล้ถึงเป้าหมายแล้ว! ทำได้ดีมาก';
+            else if (c === 0) tip.textContent = '💡 เริ่มบันทึกอาหารมื้อแรกของคุณ';
+            else tip.textContent = '👍 กำลังไปได้สวย คุมอาหารดีมาก!';
+
+            // Macro
+            const cal = dailyCalorieTarget || 2000;
+            const pw = Math.round((userProfile.weight || 65) * 1.6);
+            document.getElementById('hProtein').textContent = pw + 'g';
+            document.getElementById('hCarb').textContent = Math.round(cal * 0.5 / 4) + 'g';
+            document.getElementById('hFat').textContent = Math.round(cal * 0.25 / 9) + 'g';
+
+            // Date
+            document.getElementById('dateBadge').textContent = todayThai();
+
+            // Chart
+            const hist = [...hp.history.slice(-6), { d: td(), c }];
+            const mx = Math.max(1, ...hist.map(x => x.c));
+            document.getElementById('hChart').innerHTML = hist.map(x =>
+                `<div class="bar" style="height:${Math.max(4, (x.c / mx) * 80)}%"><span>${x.d.slice(5)}</span></div>`
+            ).join('');
+
+            // Streak
+            const days = new Set(hp.history.filter(x => x.c > 0).map(x => x.d));
+            if (c > 0) days.add(td());
+            let streak = 0, d = new Date();
+            while (days.has(d.toISOString().slice(0, 10))) { streak++; d.setDate(d.getDate() - 1); }
+            document.getElementById('hStreak').textContent = streak;
+
+            // Score
+            const score = Math.min(100, Math.round(
+                (dailyCalorieTarget ? Math.min(c / dailyCalorieTarget, 1) : 0) * 40 +
+                Math.min(hp.water / (wt || 8), 1) * 30 +
+                Math.min(b / 250, 1) * 30
+            ));
+            document.getElementById('hScore').textContent = score;
+
+            // === WATER PAGE ===
+            document.getElementById('waterTarget').textContent = wt || 8;
+            document.getElementById('waterIcons').textContent = hp.water > 0 ? '💧'.repeat(Math.min(12, hp.water)) : '💧 ยังไม่ได้ดื่ม';
+            document.getElementById('waterToday').textContent = hp.water;
+            const waterHistory = hp.history.filter(h => h.d && h.d !== td()).slice(-7);
+            const avg = waterHistory.length > 0 ? Math.round(waterHistory.reduce((s, h) => s + (h.w || 0), 0) / waterHistory.length) : 0;
+            const best = waterHistory.length > 0 ? Math.max(...waterHistory.map(h => h.w || 0)) : 0;
+            document.getElementById('waterAvg').textContent = avg;
+            document.getElementById('waterBest').textContent = best;
+
+            // Water history list
+            const whEl = document.getElementById('waterHistory');
+            const allWater = hp.history.filter(h => h.d).slice(-7).reverse();
+            whEl.innerHTML = allWater.length === 0 ? '<div class="empty-state">ยังไม่มีประวัติ</div>' :
+                allWater.map(h => `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0;">
+                    <span>${h.d}</span>
+                    <span>💧 ${h.w || 0} แก้ว</span>
+                    <span>${h.c || 0} kcal</span>
+                </div>`).join('');
+
+            // === EXERCISE PAGE ===
+            const exEl = document.getElementById('exList');
+            exEl.innerHTML = hp.ex.length === 0 ? '<div class="empty-state">ยังไม่มีกิจกรรมวันนี้</div>' :
+                hp.ex.map((x, i) => `
+                    <div class="exercise-item">
+                        <span>🏃 ${x.t}<br><small>${x.m} นาที • ${x.b} kcal</small></span>
+                        <button onclick="delEx(${i})">ลบ</button>
+                    </div>
+                `).join('');
+
+            const totalMin = hp.ex.reduce((s, x) => s + x.m, 0);
+            document.getElementById('exTotal').textContent = totalMin;
+            document.getElementById('exBurn').textContent = b;
+            document.getElementById('exSessions').textContent = hp.ex.length;
+
+            // === HISTORY PAGE ===
+            const histList = [...hp.history].reverse().slice(0, 14);
+            const hEl = document.getElementById('historyList');
+            hEl.innerHTML = histList.length === 0 ? '<div class="empty-state">ยังไม่มีประวัติ</div>' :
+                histList.map(h => `
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:13px;">
+                        <span>📅 ${h.d}</span>
+                        <span>🍽️ ${h.c || 0} kcal</span>
+                        <span>💧 ${h.w || 0} แก้ว</span>
+                    </div>
+                `).join('');
+
+            const totalDays = hp.history.filter(h => h.c > 0).length + (c > 0 ? 1 : 0);
+            const avgCal = totalDays > 0 ? Math.round(hp.history.filter(h => h.c > 0).reduce((s, h) => s + h.c, 0) / totalDays) : 0;
+            const bestDay = hp.history.length > 0 ? Math.max(...hp.history.map(h => h.c || 0), c) : 0;
+            document.getElementById('totalDays').textContent = totalDays;
+            document.getElementById('avgCal').textContent = avgCal;
+            document.getElementById('bestDay').textContent = bestDay;
+
+            // Update badge
+            updateBadge();
+        }
+
+        // ============================================
+        // BACKUP / CLEAR
+        // ============================================
+        function backupHealth() {
+            const a = document.createElement('a');
+            const data = { profile: userProfile, target: dailyCalorieTarget, foods: foodList, health: hp };
+            a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+            a.download = `calorie-backup-${td()}.json`;
+            a.click();
+        }
+
         function clearAllData() {
-            if (confirm('ต้องการล้างข้อมูลทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้')) {
+            if (confirm('ล้างข้อมูลทั้งหมด? ไม่สามารถย้อนกลับได้')) {
                 localStorage.removeItem('calorieTrackerData');
+                localStorage.removeItem('healthPlus');
                 localStorage.removeItem('installPromptShown');
                 localStorage.removeItem('appInstalled');
-                
-                // รีเซ็ตค่าทั้งหมด
                 foodList = [];
                 dailyCalorieTarget = 0;
-                userProfile = {
-                    gender: 'male',
-                    age: 30,
-                    weight: 65,
-                    height: 170,
-                    activity: 1.2
-                };
-                
-                // รีเซ็ตฟอร์ม
+                hp = { date: '', water: 0, ex: [], history: [] };
+                userProfile = { gender: 'male', age: 30, weight: 65, height: 170, activity: 1.2 };
                 document.getElementById('gender').value = 'male';
                 document.getElementById('age').value = 30;
                 document.getElementById('weight').value = 65;
                 document.getElementById('height').value = 170;
                 document.getElementById('activity').value = 1.2;
-                
-                // ซ่อนผลลัพธ์
                 document.getElementById('bmrResult').style.display = 'none';
-                document.getElementById('summarySection').style.display = 'none';
-                
                 updateFoodList();
-                
-                alert('ล้างข้อมูลทั้งหมดเรียบร้อยแล้ว');
+                refreshAll();
+                alert('ล้างข้อมูลเรียบร้อยแล้ว');
             }
         }
+
+        // ============================================
+        // PWA
+        // ============================================
+        function setupPWA() {
+            const manifest = {
+                name: "Calorie Tracker",
+                short_name: "Calorie Tracker",
+                start_url: window.location.href,
+                display: "standalone",
+                background_color: "#f0f2f5",
+                theme_color: "#4CAF50",
+                icons: [{ src: createIcon(192), sizes: "192x192", type: "image/png" }]
+            };
+            const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+            document.getElementById('manifest-placeholder').href = URL.createObjectURL(blob);
+            document.getElementById('apple-touch-icon-placeholder').href = createIcon(192);
+
+            if ('serviceWorker' in navigator) {
+                const sw = `
+                    const C='calorie-tracker-v2';
+                    self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(['${window.location.href}']))));
+                    self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.map(k=>k!==C?caches.delete(k):null)))));
+                    self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{const c=res.clone();caches.open(C).then(c=>c.put(e.request,c));return res;}))));
+                `;
+                navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw], { type: 'application/javascript' })));
+            }
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                setTimeout(() => {
+                    if (!localStorage.getItem('installPromptShown')) {
+                        document.getElementById('installPopup').classList.add('show');
+                        localStorage.setItem('installPromptShown', 'true');
+                    }
+                }, 3000);
+            });
+            window.addEventListener('appinstalled', () => {
+                document.getElementById('installPopup').classList.remove('show');
+                localStorage.setItem('appInstalled', 'true');
+            });
+        }
+
+        function createIcon(size) {
+            const c = document.createElement('canvas');
+            c.width = c.height = size;
+            const ctx = c.getContext('2d');
+            ctx.fillStyle = '#4CAF50';
+            ctx.fillRect(0, 0, size, size);
+            ctx.fillStyle = '#FF5722';
+            ctx.beginPath();
+            ctx.arc(size * 0.5, size * 0.5, size * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#8BC34A';
+            ctx.beginPath();
+            ctx.ellipse(size * 0.5, size * 0.3, size * 0.1, size * 0.05, 0, 0, Math.PI * 2);
+            ctx.fill();
+            return c.toDataURL('image/png');
+        }
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt = null;
+            }
+            closeInstallPopup();
+        }
+
+        function closeInstallPopup() {
+            document.getElementById('installPopup').classList.remove('show');
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        window.onload = function() {
+            loadAllData();
+            setupSearch();
+            setupPWA();
+            refreshAll();
+            goToPage(0);
+
+            // Auto-save profile
+            ['gender', 'age', 'weight', 'height', 'activity'].forEach(id => {
+                document.getElementById(id).addEventListener('change', () => {
+                    userProfile = {
+                        gender: document.getElementById('gender').value,
+                        age: parseInt(document.getElementById('age').value) || 30,
+                        weight: parseInt(document.getElementById('weight').value) || 65,
+                        height: parseInt(document.getElementById('height').value) || 170,
+                        activity: parseFloat(document.getElementById('activity').value) || 1.2
+                    };
+                    saveAllData();
+                });
+            });
+        };
     </script>
 </body>
 </html>
