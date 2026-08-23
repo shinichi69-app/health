@@ -7,13 +7,28 @@
     
     <!-- PWA Manifest -->
     <link rel="manifest" id="manifest-placeholder">
-    <meta name="theme-color" content="#4CAF50">
+    <meta name="theme-color" content="#00F2FE">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Calorie Tracker">
     <link rel="apple-touch-icon" id="apple-touch-icon-placeholder">
     
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #00F2FE 0%, #4FACFE 100%);
+            --health-gradient: linear-gradient(135deg, #11998E 0%, #38EF7D 100%);
+            --danger-gradient: linear-gradient(135deg, #FF0844 0%, #FFB199 100%);
+            --bg-main: #F4F7FE;
+            --card-glass: rgba(255, 255, 255, 0.75);
+            --card-border: rgba(255, 255, 255, 0.6);
+            --text-dark: #2B3674;
+            --text-muted: #A3AED0;
+            --shadow-glass: 0 18px 40px rgba(112, 144, 176, 0.12);
+            --shadow-neon: 0 8px 20px rgba(56, 239, 125, 0.3);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -22,13 +37,18 @@
         }
 
         body {
-            font-family: -apple-system, 'Sarabun', 'TH Sarabun New', sans-serif;
-            background: #f0f2f5;
+            font-family: 'Kanit', -apple-system, sans-serif;
+            background: var(--bg-main);
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,0.03) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,0.03) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,0.03) 0, transparent 50%);
             min-height: 100vh;
             overflow: hidden;
             height: 100vh;
             display: flex;
             flex-direction: column;
+            color: var(--text-dark);
         }
 
         /* ===== APP SHELL ===== */
@@ -39,7 +59,6 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            background: #f0f2f5;
             position: relative;
             overflow: hidden;
         }
@@ -49,27 +68,33 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 16px;
-            background: white;
-            border-bottom: 1px solid #f0f0f0;
+            padding: 16px 20px;
+            background: var(--card-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
             flex-shrink: 0;
             z-index: 10;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
         }
 
         .app-header h1 {
-            font-size: 18px;
-            color: #333;
+            font-size: 20px;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin: 0;
         }
 
         .app-header .badge {
-            background: #4CAF50;
+            background: var(--health-gradient);
             color: white;
-            padding: 4px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
+            box-shadow: var(--shadow-neon);
         }
 
         /* ===== PAGE CONTAINER ===== */
@@ -81,7 +106,7 @@
 
         .page-wrapper {
             display: flex;
-            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             height: 100%;
             will-change: transform;
         }
@@ -91,30 +116,29 @@
             height: 100%;
             overflow-y: auto;
             overflow-x: hidden;
-            padding: 12px 12px 80px 12px;
+            padding: 16px 16px 100px 16px;
             -webkit-overflow-scrolling: touch;
-            background: #f0f2f5;
         }
 
-        .page::-webkit-scrollbar {
-            width: 3px;
-        }
-        .page::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 10px;
-        }
+        .page::-webkit-scrollbar { width: 4px; }
+        .page::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
 
-        /* ===== BOTTOM NAV ===== */
+        /* ===== BOTTOM NAV (Floating Glass) ===== */
         .bottom-nav {
             display: flex;
-            background: white;
-            border-top: 1px solid #f0f0f0;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
             flex-shrink: 0;
-            padding: 4px 0 env(safe-area-inset-bottom, 4px) 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
+            padding: 8px 10px calc(env(safe-area-inset-bottom) + 8px) 10px;
+            box-shadow: 0 -10px 40px rgba(112, 144, 176, 0.15);
             z-index: 20;
-            position: sticky;
-            bottom: 0;
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            right: 16px;
+            border-radius: 30px;
         }
 
         .bottom-nav button {
@@ -123,261 +147,243 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 6px 0;
+            padding: 8px 0;
             border: none;
             background: transparent;
-            font-size: 10px;
-            color: #999;
+            font-size: 11px;
+            color: var(--text-muted);
             cursor: pointer;
-            transition: color 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             touch-action: manipulation;
             position: relative;
-            gap: 1px;
-            min-height: 52px;
+            gap: 4px;
+            font-family: 'Kanit', sans-serif;
         }
 
         .bottom-nav button .nav-icon {
-            font-size: 20px;
+            font-size: 22px;
             line-height: 1.2;
+            transition: all 0.3s ease;
         }
 
         .bottom-nav button .nav-label {
-            font-size: 10px;
             font-weight: 500;
         }
 
         .bottom-nav button.active {
-            color: #4CAF50;
+            color: #4FACFE;
         }
 
         .bottom-nav button.active .nav-icon {
-            transform: scale(1.05);
-        }
-
-        .bottom-nav button:active {
-            transform: scale(0.92);
+            transform: translateY(-4px) scale(1.15);
+            text-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
         }
 
         .bottom-nav .nav-badge {
             position: absolute;
-            top: 2px;
+            top: 0;
             right: 50%;
-            transform: translateX(calc(50% + 12px));
-            background: #ff6b6b;
+            transform: translateX(calc(50% + 10px));
+            background: var(--danger-gradient);
             color: white;
-            font-size: 9px;
-            padding: 1px 6px;
-            border-radius: 10px;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 12px;
             font-weight: 700;
-            min-width: 16px;
-            text-align: center;
+            min-width: 18px;
+            box-shadow: 0 4px 10px rgba(255, 8, 68, 0.3);
         }
 
         /* ===== SECTION STYLES ===== */
         .section {
-            background: white;
-            border-radius: 14px;
-            padding: 14px;
-            margin-bottom: 12px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-            border: 1px solid #f0f0f0;
+            background: var(--card-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-glass);
+            border: 1px solid var(--card-border);
+            transition: transform 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-2px);
         }
 
         .section h2 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 15px;
+            color: var(--text-dark);
+            margin-bottom: 14px;
+            font-size: 16px;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
-        .form-group {
-            margin-bottom: 10px;
-        }
+        .form-group { margin-bottom: 12px; }
 
         label {
             display: block;
-            margin-bottom: 3px;
-            color: #666;
+            margin-bottom: 6px;
+            color: var(--text-muted);
             font-weight: 500;
             font-size: 13px;
         }
 
         input, select {
             width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-            background: white;
+            padding: 12px 16px;
+            border: 2px solid #E2E8F0;
+            border-radius: 16px;
+            font-size: 15px;
+            font-family: 'Kanit', sans-serif;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.9);
             -webkit-appearance: none;
             appearance: none;
         }
 
         input:focus, select:focus {
             outline: none;
-            border-color: #4CAF50;
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.12);
+            border-color: #4FACFE;
+            box-shadow: 0 0 0 4px rgba(79, 172, 254, 0.15);
+            background: #FFF;
         }
 
         select {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A3AED0' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 32px;
+            background-position: right 16px center;
+            padding-right: 40px;
         }
 
         .btn {
-            background: #4CAF50;
+            background: var(--health-gradient);
             color: white;
-            padding: 12px 16px;
+            padding: 14px 20px;
             border: none;
-            border-radius: 10px;
+            border-radius: 16px;
             font-size: 15px;
+            font-family: 'Kanit', sans-serif;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.15s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             width: 100%;
-            touch-action: manipulation;
+            box-shadow: var(--shadow-neon);
         }
 
         .btn:active {
-            transform: scale(0.97);
-            background: #43a047;
+            transform: scale(0.96);
+            box-shadow: 0 4px 10px rgba(56, 239, 125, 0.2);
         }
 
         .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
+            background: rgba(255,255,255,0.9);
+            color: #4FACFE;
+            border: 2px solid #E2E8F0;
+            box-shadow: none;
         }
-        .btn-secondary:active {
-            background: #e0e0e0;
-        }
-
-        .btn-sm {
-            padding: 8px 14px;
-            font-size: 13px;
-            width: auto;
-            border-radius: 8px;
-        }
+        .btn-secondary:active { background: #F8FAFC; }
 
         .btn-danger {
-            background: #ff6b6b;
-        }
-        .btn-danger:active {
-            background: #e55a5a;
+            background: var(--danger-gradient);
+            box-shadow: 0 8px 20px rgba(255, 8, 68, 0.3);
         }
 
+        /* Result Box */
         .result-box {
-            background: #e8f5e9;
-            border-radius: 10px;
-            padding: 14px;
-            margin-top: 10px;
+            background: rgba(56, 239, 125, 0.1);
+            border: 1px solid rgba(56, 239, 125, 0.3);
+            border-radius: 16px;
+            padding: 16px;
+            margin-top: 12px;
             text-align: center;
         }
-        .result-box.warning { background: #fff3e0; }
-        .result-box.danger { background: #ffebee; }
-
         .result-box .calories {
-            font-size: 2em;
-            color: #4CAF50;
-            font-weight: bold;
+            font-size: 2.2em;
+            background: var(--health-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
         }
-        .result-box .calories.danger { color: #f44336; }
-
-        /* Food List */
-        .food-list {
-            list-style: none;
-        }
-        .food-item {
-            background: white;
-            padding: 10px 12px;
-            margin-bottom: 6px;
-            border-radius: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid #f0f0f0;
-        }
-        .food-item .delete-btn {
-            background: #ff6b6b;
-            color: white;
-            border: none;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            touch-action: manipulation;
-        }
-        .food-item .delete-btn:active { transform: scale(0.95); }
-
-        /* Progress */
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 8px 0;
-        }
-        .progress-fill {
-            height: 100%;
-            background: #4CAF50;
-            transition: width 0.5s ease;
-            border-radius: 10px;
-        }
-        .progress-fill.warning { background: #ff9800; }
-        .progress-fill.danger { background: #f44336; }
-
-        /* Stats */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            margin-top: 10px;
-        }
-        .stat-card {
-            background: white;
-            padding: 10px 6px;
-            border-radius: 10px;
-            text-align: center;
-            border: 1px solid #f0f0f0;
-        }
-        .stat-card .value {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #333;
-        }
-        .stat-card .label {
-            color: #999;
-            font-size: 10px;
-        }
+        
+        .result-box.danger { background: #ffebee; border-color: rgba(255, 8, 68, 0.3); }
+        .result-box .calories.danger { background: var(--danger-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
         /* Dashboard Grid */
         .dash-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
+            gap: 10px;
         }
         .dash-card {
             background: white;
-            border-radius: 10px;
-            padding: 10px 4px;
+            border-radius: 16px;
+            padding: 14px 6px;
             text-align: center;
-            border: 1px solid #f0f0f0;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
         .dash-card b {
             display: block;
-            font-size: 1.1em;
-            margin: 1px 0;
+            font-size: 1.2em;
+            color: var(--text-dark);
+            margin: 4px 0;
         }
         .dash-card small {
-            font-size: 9px;
-            color: #999;
+            font-size: 10px;
+            color: var(--text-muted);
+            font-weight: 500;
         }
 
-        /* Water */
+        /* Progress */
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #E2E8F0;
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 16px 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--health-gradient);
+            transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border-radius: 20px;
+        }
+        .progress-fill.warning { background: linear-gradient(135deg, #F6D365 0%, #FDA085 100%); }
+        .progress-fill.danger { background: var(--danger-gradient); }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .stat-card {
+            background: white;
+            padding: 12px 8px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            border: 1px solid var(--card-border);
+        }
+        .stat-card .value {
+            font-size: 1.25em;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        .stat-card .label {
+            color: var(--text-muted);
+            font-size: 11px;
+            margin-top: 2px;
+        }
+
+        /* Water & Exercise buttons */
         .water-row {
             display: flex;
             gap: 8px;
@@ -386,16 +392,19 @@
         .water-row button {
             flex: 1;
             padding: 12px;
-            border: none;
-            border-radius: 10px;
+            background: white;
+            color: var(--text-dark);
+            border: 2px solid #E2E8F0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            border-radius: 16px;
             font-size: 16px;
             font-weight: 600;
             touch-action: manipulation;
         }
-        .water-row button:first-child { background: #4CAF50; color: white; }
-        .water-row button:first-child:active { background: #43a047; }
-        .water-row button:last-child { background: #ff6b6b; color: white; }
-        .water-row button:last-child:active { background: #e55a5a; }
+        .water-row button:first-child { background: var(--primary-gradient); color: white; border:none; box-shadow: 0 8px 20px rgba(0,242,254,0.3); }
+        .water-row button:first-child:active { transform: scale(0.96); }
+        .water-row button:last-child { background: white; border: 2px solid #FFE4E6; color: #FF0844; }
+        .water-row button:last-child:active { transform: scale(0.96); background: #FFF1F2; }
 
         /* Two col */
         .two-col {
@@ -404,110 +413,148 @@
             gap: 8px;
         }
 
-        /* Macro */
-        .macro-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            margin-top: 8px;
-        }
-        .macro-grid div {
-            background: white;
-            border-radius: 10px;
-            padding: 8px;
-            text-align: center;
-            border: 1px solid #f0f0f0;
-        }
-        .macro-grid b {
-            display: block;
-            font-size: 1em;
-        }
-        .macro-grid small {
-            font-size: 10px;
-            color: #999;
-        }
-
-        /* Chart */
-        .chart {
-            height: 80px;
-            display: flex;
-            align-items: end;
-            gap: 4px;
-            padding: 4px 0;
-            border-bottom: 2px solid #eee;
-        }
-        .bar {
-            flex: 1;
-            background: #4CAF50;
-            border-radius: 4px 4px 0 0;
-            min-height: 4px;
-            position: relative;
-            transition: height 0.5s ease;
-        }
-        .bar span {
-            position: absolute;
-            bottom: -18px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 8px;
-            color: #999;
-        }
-
+        /* Tip Box */
         .tip-box {
-            margin-top: 8px;
-            background: #e8f5e9;
-            border-left: 4px solid #4CAF50;
-            padding: 10px 12px;
-            border-radius: 8px;
+            margin-top: 12px;
+            background: rgba(0, 242, 254, 0.1);
+            border-left: 4px solid #00F2FE;
+            padding: 12px 16px;
+            border-radius: 0 12px 12px 0;
             font-size: 13px;
-            color: #333;
+            color: var(--text-dark);
+            font-weight: 500;
         }
 
-        .exercise-item {
+        /* Food List */
+        .food-list {
+            list-style: none;
+        }
+        .food-item {
+            background: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: white;
-            padding: 8px 12px;
-            border-radius: 10px;
-            margin-top: 4px;
-            border: 1px solid #f0f0f0;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            border: 1px solid #F1F5F9;
         }
-        .exercise-item button {
-            padding: 4px 12px;
-            font-size: 12px;
-            border-radius: 6px;
+        .food-item .delete-btn {
+            background: #FFF1F2;
+            color: #FF0844;
             border: none;
-            background: #ff6b6b;
-            color: white;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 10px;
             touch-action: manipulation;
         }
-        .exercise-item button:active { transform: scale(0.95); }
+        .food-item .delete-btn:active { transform: scale(0.95); }
 
-        .empty-state {
+        /* Macro Grid */
+        .macro-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .macro-grid div {
+            background: white;
+            border-radius: 16px;
+            padding: 12px;
             text-align: center;
-            color: #999;
-            padding: 12px 0;
-            font-size: 13px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            border: 1px solid var(--card-border);
+        }
+        .macro-grid b {
+            display: block;
+            font-size: 1.1em;
+        }
+        .macro-grid small {
+            font-size: 11px;
+            color: var(--text-muted);
         }
 
         /* Quick add */
         .quick-add {
             display: flex;
             flex-wrap: wrap;
-            gap: 4px;
-            margin: 6px 0 8px 0;
+            gap: 6px;
+            margin: 10px 0 12px 0;
         }
         .quick-add button {
-            padding: 5px 10px;
-            border-radius: 16px;
-            border: 1px solid #ddd;
             background: white;
-            font-size: 11px;
-            color: #555;
+            border: 1px solid #E2E8F0;
+            color: var(--text-dark);
+            font-family: 'Kanit', sans-serif;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
             touch-action: manipulation;
         }
-        .quick-add button:active { background: #f0f0f0; }
+        .quick-add button:active {
+            background: var(--bg-main);
+            transform: scale(0.95);
+        }
+
+        /* Chart */
+        .chart {
+            height: 100px;
+            display: flex;
+            align-items: end;
+            gap: 6px;
+            padding: 10px 0;
+            border-bottom: 2px solid #E2E8F0;
+        }
+        .bar {
+            flex: 1;
+            background: var(--primary-gradient);
+            border-radius: 6px 6px 0 0;
+            min-height: 4px;
+            position: relative;
+            transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .bar span {
+            position: absolute;
+            bottom: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        /* Exercise Item */
+        .exercise-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 12px 16px;
+            border-radius: 16px;
+            margin-top: 8px;
+            border: 1px solid #F1F5F9;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+        .exercise-item button {
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 10px;
+            border: none;
+            background: #FFF1F2;
+            color: #FF0844;
+            touch-action: manipulation;
+        }
+        .exercise-item button:active { transform: scale(0.95); }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 20px 0;
+            font-size: 14px;
+        }
 
         /* Search */
         .food-input-wrapper {
@@ -516,99 +563,94 @@
         .search-results {
             position: absolute;
             background: white;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            max-height: 160px;
+            border: 1px solid #E2E8F0;
+            border-radius: 16px;
+            max-height: 180px;
             overflow-y: auto;
             width: 100%;
             z-index: 100;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            margin-top: 2px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin-top: 4px;
         }
         .search-result-item {
-            padding: 8px 12px;
+            padding: 12px 16px;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #f5f5f5;
+            border-bottom: 1px solid #F1F5F9;
             touch-action: manipulation;
+            font-size: 14px;
         }
-        .search-result-item:active { background: #f0f0f0; }
+        .search-result-item:active { background: #F8FAFC; }
         .search-result-item .food-calories {
-            color: #4CAF50;
-            font-weight: bold;
-            font-size: 13px;
+            color: #11998E;
+            font-weight: 600;
+            font-size: 14px;
         }
 
         /* Install Popup */
         .install-popup {
             display: none;
             position: fixed;
-            bottom: 70px;
+            bottom: 100px;
             left: 50%;
             transform: translateX(-50%);
             background: white;
-            border-radius: 16px;
-            padding: 16px 20px;
-            box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+            border-radius: 20px;
+            padding: 20px 24px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
             z-index: 9999;
             max-width: 90%;
             width: 340px;
             text-align: center;
+            border: 1px solid var(--card-border);
         }
-        .install-popup.show { display: block; animation: slideUp 0.4s ease; }
+        .install-popup.show { display: block; animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
         @keyframes slideUp {
             from { transform: translate(-50%, 100%); opacity: 0; }
             to { transform: translate(-50%, 0); opacity: 1; }
         }
-        .install-popup h3 { font-size: 16px; margin-bottom: 4px; }
-        .install-popup p { font-size: 13px; color: #666; margin-bottom: 12px; }
-        .install-popup .btn-row { display: flex; gap: 8px; }
+        .install-popup h3 { font-size: 18px; margin-bottom: 6px; color: var(--text-dark); }
+        .install-popup p { font-size: 14px; color: var(--text-muted); margin-bottom: 16px; }
+        .install-popup .btn-row { display: flex; gap: 10px; }
         .install-popup .btn-row button {
             flex: 1;
-            padding: 10px;
+            padding: 12px;
             border: none;
-            border-radius: 10px;
-            font-size: 14px;
+            border-radius: 14px;
+            font-size: 15px;
             font-weight: 600;
+            font-family: 'Kanit', sans-serif;
             touch-action: manipulation;
         }
-        .install-popup .install-btn { background: #4CAF50; color: white; }
-        .install-popup .install-btn:active { background: #43a047; }
-        .install-popup .cancel-btn { background: #f0f0f0; color: #333; }
-        .install-popup .cancel-btn:active { background: #e0e0e0; }
+        .install-popup .install-btn { background: var(--health-gradient); color: white; box-shadow: var(--shadow-neon); }
+        .install-popup .install-btn:active { transform: scale(0.96); }
+        .install-popup .cancel-btn { background: #F1F5F9; color: var(--text-dark); }
+        .install-popup .cancel-btn:active { background: #E2E8F0; transform: scale(0.96); }
 
         /* Clear button */
         .clear-btn {
-            background: #ff9800;
+            background: linear-gradient(135deg, #F6D365 0%, #FDA085 100%);
             color: white;
-            padding: 8px 14px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 8px;
-            font-size: 13px;
+            border-radius: 16px;
+            font-size: 15px;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 600;
             touch-action: manipulation;
+            box-shadow: 0 8px 20px rgba(253, 160, 133, 0.3);
         }
-        .clear-btn:active { transform: scale(0.95); }
+        .clear-btn:active { transform: scale(0.96); }
 
-        /* Scrollbar hide */
-        .page::-webkit-scrollbar { width: 3px; }
-        .page::-webkit-scrollbar-track { background: transparent; }
-        .page::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
-
-        /* Responsive */
+        /* Responsive tweaks */
         @media (max-width: 480px) {
-            .page { padding: 8px 8px 70px 8px; }
-            .section { padding: 12px; }
-            .dash-grid { grid-template-columns: repeat(4, 1fr); gap: 4px; }
-            .dash-card { padding: 8px 2px; }
-            .dash-card b { font-size: 0.95em; }
-            .stats-grid { gap: 4px; }
-            .stat-card { padding: 8px 4px; }
-            .stat-card .value { font-size: 1em; }
+            .bottom-nav { left: 12px; right: 12px; bottom: 12px; }
+            .dash-card { padding: 12px 4px; }
+            .page { padding: 16px 12px 100px 12px; }
+            .section { padding: 16px; }
             .two-col { grid-template-columns: 1fr; }
-            .bottom-nav button { min-height: 46px; padding: 4px 0; }
-            .bottom-nav button .nav-icon { font-size: 18px; }
         }
         @media (max-width: 380px) {
             .dash-grid { grid-template-columns: repeat(2, 1fr); }
@@ -655,12 +697,12 @@
 
                     <div class="section">
                         <h2>🎯 เป้าหมายสุขภาพ</h2>
-                        <select id="hGoal" style="margin-bottom:6px;">
+                        <select id="hGoal" style="margin-bottom:12px;">
                             <option value="maintain">รักษาน้ำหนัก</option>
                             <option value="lose">ลดน้ำหนัก (-500 kcal)</option>
                             <option value="gain">เพิ่มน้ำหนัก (+300 kcal)</option>
                         </select>
-                        <button class="btn btn-secondary" onclick="applyHealthGoal()" style="margin-bottom:6px;">ปรับเป้าหมายอัตโนมัติ</button>
+                        <button class="btn btn-secondary" onclick="applyHealthGoal()" style="margin-bottom:12px;">ปรับเป้าหมายอัตโนมัติ</button>
                         <div class="macro-grid">
                             <div>🥩<b id="hProtein">0g</b><small>โปรตีน</small></div>
                             <div>🍚<b id="hCarb">0g</b><small>คาร์บ</small></div>
@@ -671,7 +713,7 @@
                     <div class="section">
                         <h2>📈 แนวโน้ม 7 วัน</h2>
                         <div class="chart" id="hChart"></div>
-                        <div class="stats-grid" style="margin-top:10px;">
+                        <div class="stats-grid" style="margin-top:16px;">
                             <div class="stat-card"><div class="value" id="hStreak">0</div><div class="label">🔥 วันต่อเนื่อง</div></div>
                             <div class="stat-card"><div class="value" id="hScore">0</div><div class="label">⭐ คะแนนสุขภาพ</div></div>
                             <div class="stat-card"><div class="value" id="hTotalDays">0</div><div class="label">📅 วันบันทึก</div></div>
@@ -713,11 +755,11 @@
                             </select>
                         </div>
                         <button class="btn" onclick="calculateBMR()">คำนวณแคลอรี่ที่ควรได้รับ</button>
-                        <div id="bmrResult" style="display:none; margin-top:10px;">
+                        <div id="bmrResult" style="display:none; margin-top:16px;">
                             <div class="result-box">
-                                <h3 style="font-size:13px;color:#666;">แคลอรี่ที่ควรได้รับต่อวัน</h3>
+                                <h3 style="font-size:14px;color:var(--text-muted);">แคลอรี่ที่ควรได้รับต่อวัน</h3>
                                 <div class="calories" id="dailyCalories">0</div>
-                                <p style="font-size:12px;color:#666;">กิโลแคลอรี่/วัน</p>
+                                <p style="font-size:13px;color:var(--text-muted);">กิโลแคลอรี่/วัน</p>
                             </div>
                         </div>
                     </div>
@@ -725,12 +767,12 @@
                     <div class="section">
                         <h2>🍽️ บันทึกอาหาร</h2>
                         <div class="food-input-wrapper">
-                            <div class="form-group" style="margin-bottom:6px;">
+                            <div class="form-group" style="margin-bottom:12px;">
                                 <label>ชื่ออาหาร</label>
                                 <input type="text" id="foodName" placeholder="พิมพ์ชื่ออาหาร..." autocomplete="off">
                                 <div id="searchResults" class="search-results" style="display:none;"></div>
                             </div>
-                            <div class="form-group" style="margin-bottom:6px;">
+                            <div class="form-group" style="margin-bottom:12px;">
                                 <label>แคลอรี่ (kcal)</label>
                                 <input type="number" id="foodCalories" placeholder="แคลอรี่" min="0">
                             </div>
@@ -743,20 +785,20 @@
                             <button onclick="quickAdd('น้ำอัดลม', 150)">🥤 น้ำอัดลม</button>
                             <button onclick="quickAdd('ไก่ทอด', 350)">🍗 ไก่ทอด</button>
                         </div>
-                        <button class="btn" onclick="addFood()">➕ เพิ่มอาหาร</button>
+                        <button class="btn" onclick="addFood()" style="margin-top: 8px;">➕ เพิ่มอาหาร</button>
                     </div>
 
                     <div class="section">
                         <h2>📋 รายการอาหารวันนี้</h2>
                         <ul class="food-list" id="foodList"></ul>
-                        <div id="totalCaloriesBox" style="display:none; margin-top:8px;">
+                        <div id="totalCaloriesBox" style="display:none; margin-top:12px;">
                             <div class="result-box">
-                                <h3 style="font-size:13px;color:#666;">รวมแคลอรี่ที่ทานไปแล้ว</h3>
+                                <h3 style="font-size:14px;color:var(--text-muted);">รวมแคลอรี่ที่ทานไปแล้ว</h3>
                                 <div class="calories" id="totalCalories">0</div>
-                                <p style="font-size:12px;color:#666;">กิโลแคลอรี่</p>
+                                <p style="font-size:13px;color:var(--text-muted);">กิโลแคลอรี่</p>
                             </div>
                         </div>
-                        <button class="clear-btn" onclick="clearAllData()" style="margin-top:8px;width:100%;">🗑️ ล้างข้อมูลทั้งหมด</button>
+                        <button class="clear-btn" onclick="clearAllData()" style="margin-top:16px;width:100%;">🗑️ ล้างข้อมูลทั้งหมด</button>
                     </div>
                 </div>
 
@@ -768,9 +810,9 @@
                             <button onclick="water(1)">+ 1 แก้ว</button>
                             <button onclick="water(-1)">− 1 แก้ว</button>
                         </div>
-                        <div id="waterIcons" style="font-size:26px;text-align:center;margin:8px 0;"></div>
-                        <p style="text-align:center;font-size:14px;color:#666;">เป้าหมาย <b id="waterTarget">8</b> แก้ว/วัน</p>
-                        <div class="stats-grid" style="margin-top:10px;">
+                        <div id="waterIcons" style="font-size:28px;text-align:center;margin:16px 0;letter-spacing: 4px;"></div>
+                        <p style="text-align:center;font-size:15px;color:var(--text-muted);">เป้าหมาย <b id="waterTarget" style="color:var(--text-dark);">8</b> แก้ว/วัน</p>
+                        <div class="stats-grid" style="margin-top:16px;">
                             <div class="stat-card"><div class="value" id="waterToday">0</div><div class="label">วันนี้</div></div>
                             <div class="stat-card"><div class="value" id="waterAvg">0</div><div class="label">เฉลี่ย 7 วัน</div></div>
                             <div class="stat-card"><div class="value" id="waterBest">0</div><div class="label">สูงสุด</div></div>
@@ -778,7 +820,7 @@
                     </div>
                     <div class="section">
                         <h2>📊 ประวัติการดื่มน้ำ</h2>
-                        <div id="waterHistory" style="font-size:13px;color:#666;"></div>
+                        <div id="waterHistory" style="font-size:14px;color:var(--text-muted);"></div>
                     </div>
                 </div>
 
@@ -798,13 +840,13 @@
                             </select>
                             <input id="exMin" type="number" value="30" min="1" placeholder="นาที">
                         </div>
-                        <button class="btn" onclick="addEx()" style="margin-top:8px;">➕ เพิ่มกิจกรรม</button>
+                        <button class="btn" onclick="addEx()" style="margin-top:16px;">➕ เพิ่มกิจกรรม</button>
                     </div>
 
                     <div class="section">
                         <h2>📋 กิจกรรมวันนี้</h2>
                         <div id="exList"></div>
-                        <div class="stats-grid" style="margin-top:10px;">
+                        <div class="stats-grid" style="margin-top:16px;">
                             <div class="stat-card"><div class="value" id="exTotal">0</div><div class="label">นาทีทั้งหมด</div></div>
                             <div class="stat-card"><div class="value" id="exBurn">0</div><div class="label">แคลอรี่เผาผลาญ</div></div>
                             <div class="stat-card"><div class="value" id="exSessions">0</div><div class="label">ครั้ง</div></div>
@@ -816,7 +858,7 @@
                 <div class="page" id="page-history">
                     <div class="section">
                         <h2>📈 ประวัติย้อนหลัง</h2>
-                        <div id="historyList" style="margin-top:6px;"></div>
+                        <div id="historyList" style="margin-top:10px;"></div>
                     </div>
                     <div class="section">
                         <h2>📊 สถิติรวม</h2>
@@ -1047,11 +1089,11 @@
                 li.className = 'food-item';
                 li.innerHTML = `
                     <div>
-                        <strong style="font-size:14px;">${f.name}</strong>
-                        <br><small style="color:#999;font-size:10px;">${new Date(f.timestamp).toLocaleTimeString('th-TH', {hour:'2-digit',minute:'2-digit'})}</small>
+                        <strong style="font-size:15px; color:var(--text-dark);">${f.name}</strong>
+                        <br><small style="color:var(--text-muted);font-size:11px;">${new Date(f.timestamp).toLocaleTimeString('th-TH', {hour:'2-digit',minute:'2-digit'})}</small>
                     </div>
-                    <div style="display:flex;align-items:center;gap:6px;">
-                        <span style="font-weight:600;color:#4CAF50;font-size:14px;">${f.calories} kcal</span>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span style="font-weight:600;color:#11998E;font-size:15px;">${f.calories} kcal</span>
                         <button class="delete-btn" onclick="removeFood(${i})">ลบ</button>
                     </div>
                 `;
@@ -1081,13 +1123,13 @@
                 if (matches.length > 0) {
                     results.innerHTML = matches.map(f => `
                         <div class="search-result-item" onclick="selectFood('${f}')">
-                            <span>${f}</span>
+                            <span style="color:var(--text-dark); font-weight:500;">${f}</span>
                             <span class="food-calories">${foodDatabase[f]} kcal</span>
                         </div>
                     `).join('');
                     results.style.display = 'block';
                 } else {
-                    results.innerHTML = '<div class="search-result-item" style="color:#999;">ไม่พบอาหาร กรุณาใส่แคลอรี่เอง</div>';
+                    results.innerHTML = '<div class="search-result-item" style="color:var(--text-muted);">ไม่พบอาหาร กรุณาใส่แคลอรี่เอง</div>';
                     results.style.display = 'block';
                 }
             });
@@ -1167,12 +1209,12 @@
 
             // Tip
             const tip = document.getElementById('dashTip');
-            if (hp.water < wt / 2) tip.textContent = '💧 วันนี้ดื่มน้ำน้อย ลองจิบน้ำให้สม่ำเสมอ';
-            else if (b === 0) tip.textContent = '🏃 ลองเพิ่มกิจกรรมเบา ๆ เช่น เดินเร็ว 20 นาที';
-            else if (pct > 100) tip.textContent = '⚠️ คุณทานเกินเป้าหมาย ลองลดอาหารมื้อต่อไป';
-            else if (pct > 80) tip.textContent = '🌟 ใกล้ถึงเป้าหมายแล้ว! ทำได้ดีมาก';
-            else if (c === 0) tip.textContent = '💡 เริ่มบันทึกอาหารมื้อแรกของคุณ';
-            else tip.textContent = '👍 กำลังไปได้สวย คุมอาหารดีมาก!';
+            if (hp.water < wt / 2) tip.innerHTML = '💧 วันนี้ดื่มน้ำน้อย <span style="color:#00F2FE;">ลองจิบน้ำให้สม่ำเสมอ</span>';
+            else if (b === 0) tip.innerHTML = '🏃 ลองเพิ่มกิจกรรมเบา ๆ เช่น <span style="color:#00F2FE;">เดินเร็ว 20 นาที</span>';
+            else if (pct > 100) tip.innerHTML = '⚠️ คุณทานเกินเป้าหมาย <span style="color:#FF0844;">ลองลดอาหารมื้อต่อไป</span>';
+            else if (pct > 80) tip.innerHTML = '🌟 ใกล้ถึงเป้าหมายแล้ว! <span style="color:#11998E;">ทำได้ดีมาก</span>';
+            else if (c === 0) tip.innerHTML = '💡 <span style="color:#00F2FE;">เริ่มบันทึก</span>อาหารมื้อแรกของคุณ';
+            else tip.innerHTML = '👍 กำลังไปได้สวย <span style="color:#11998E;">คุมอาหารดีมาก!</span>';
 
             // Macro
             const cal = dailyCalorieTarget || 2000;
@@ -1224,9 +1266,9 @@
             const whEl = document.getElementById('waterHistory');
             const allWater = hp.history.filter(h => h.d).slice(-7).reverse();
             whEl.innerHTML = allWater.length === 0 ? '<div class="empty-state">ยังไม่มีประวัติ</div>' :
-                allWater.map(h => `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0;">
-                    <span>${h.d}</span>
-                    <span>💧 ${h.w || 0} แก้ว</span>
+                allWater.map(h => `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F1F5F9;">
+                    <span style="color:var(--text-dark);font-weight:500;">${h.d}</span>
+                    <span style="color:#4FACFE;">💧 ${h.w || 0} แก้ว</span>
                     <span>${h.c || 0} kcal</span>
                 </div>`).join('');
 
@@ -1235,7 +1277,7 @@
             exEl.innerHTML = hp.ex.length === 0 ? '<div class="empty-state">ยังไม่มีกิจกรรมวันนี้</div>' :
                 hp.ex.map((x, i) => `
                     <div class="exercise-item">
-                        <span>🏃 ${x.t}<br><small>${x.m} นาที • ${x.b} kcal</small></span>
+                        <span style="color:var(--text-dark);font-weight:500;">🏃 ${x.t}<br><small style="color:var(--text-muted);font-weight:400;">${x.m} นาที • <span style="color:#FF0844;">${x.b} kcal</span></small></span>
                         <button onclick="delEx(${i})">ลบ</button>
                     </div>
                 `).join('');
@@ -1250,10 +1292,10 @@
             const hEl = document.getElementById('historyList');
             hEl.innerHTML = histList.length === 0 ? '<div class="empty-state">ยังไม่มีประวัติ</div>' :
                 histList.map(h => `
-                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:13px;">
-                        <span>📅 ${h.d}</span>
-                        <span>🍽️ ${h.c || 0} kcal</span>
-                        <span>💧 ${h.w || 0} แก้ว</span>
+                    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:14px;">
+                        <span style="color:var(--text-dark);font-weight:500;">📅 ${h.d}</span>
+                        <span style="color:#11998E;">🍽️ ${h.c || 0} kcal</span>
+                        <span style="color:#4FACFE;">💧 ${h.w || 0} แก้ว</span>
                     </div>
                 `).join('');
 
@@ -1301,8 +1343,8 @@
                 short_name: "Calorie Tracker",
                 start_url: window.location.href,
                 display: "standalone",
-                background_color: "#f0f2f5",
-                theme_color: "#4CAF50",
+                background_color: "#F4F7FE",
+                theme_color: "#00F2FE",
                 icons: [{ src: createIcon(192), sizes: "192x192", type: "image/png" }]
             };
             const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
@@ -1311,7 +1353,7 @@
 
             if ('serviceWorker' in navigator) {
                 const sw = `
-                    const C='calorie-tracker-v2';
+                    const C='calorie-tracker-v3';
                     self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(['${window.location.href}']))));
                     self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.map(k=>k!==C?caches.delete(k):null)))));
                     self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{const c=res.clone();caches.open(C).then(c=>c.put(e.request,c));return res;}))));
@@ -1339,16 +1381,26 @@
             const c = document.createElement('canvas');
             c.width = c.height = size;
             const ctx = c.getContext('2d');
-            ctx.fillStyle = '#4CAF50';
+            
+            // Background
+            const grd = ctx.createLinearGradient(0, 0, size, size);
+            grd.addColorStop(0, '#00F2FE');
+            grd.addColorStop(1, '#4FACFE');
+            ctx.fillStyle = grd;
             ctx.fillRect(0, 0, size, size);
-            ctx.fillStyle = '#FF5722';
+            
+            // Apple
+            ctx.fillStyle = '#FFFFFF';
             ctx.beginPath();
-            ctx.arc(size * 0.5, size * 0.5, size * 0.3, 0, Math.PI * 2);
+            ctx.arc(size * 0.5, size * 0.55, size * 0.25, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillStyle = '#8BC34A';
+            
+            // Leaf
+            ctx.fillStyle = '#38EF7D';
             ctx.beginPath();
-            ctx.ellipse(size * 0.5, size * 0.3, size * 0.1, size * 0.05, 0, 0, Math.PI * 2);
+            ctx.ellipse(size * 0.55, size * 0.35, size * 0.1, size * 0.05, -Math.PI/6, 0, Math.PI * 2);
             ctx.fill();
+            
             return c.toDataURL('image/png');
         }
 
