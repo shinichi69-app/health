@@ -241,6 +241,23 @@
             text-align: center;
         }
 
+        /* ปุ่มล้างข้อมูล */
+        .clear-btn {
+            background: #ff9800;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: auto;
+        }
+
+        .clear-btn:hover {
+            background: #f57c00;
+        }
+
         /* Popup ติดตั้งแอพ */
         .install-popup {
             display: none;
@@ -293,6 +310,7 @@
             font-size: 16px;
             cursor: pointer;
             margin: 5px;
+            width: auto;
         }
 
         .install-popup .cancel-btn {
@@ -304,6 +322,7 @@
             font-size: 16px;
             cursor: pointer;
             margin: 5px;
+            width: auto;
         }
 
         @media (max-width: 600px) {
@@ -412,6 +431,11 @@
             </div>
             <div id="summaryMessage" class="result-box" style="margin-top: 20px;"></div>
         </div>
+
+        <!-- ปุ่มล้างข้อมูล -->
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="clear-btn" onclick="clearAllData()">🗑️ ล้างข้อมูลทั้งหมด</button>
+        </div>
     </div>
 
     <!-- Popup ติดตั้งแอพ -->
@@ -427,6 +451,13 @@
         let foodList = [];
         let dailyCalorieTarget = 0;
         let deferredPrompt = null;
+        let userProfile = {
+            gender: 'male',
+            age: 30,
+            weight: 65,
+            height: 170,
+            activity: 1.2
+        };
 
         // ฐานข้อมูลอาหารยอดนิยม (ชื่ออาหาร: แคลอรี่ต่อหน่วยบริโภค)
         const foodDatabase = {
@@ -547,10 +578,33 @@
 
         // โหลดข้อมูลจาก LocalStorage เมื่อเปิดแอพ
         window.onload = function() {
-            loadData();
+            loadAllData();
             setupFoodSearch();
             setupPWA();
+            setupAutoSave();
         };
+
+        // ตั้งค่าระบบ Auto Save
+        function setupAutoSave() {
+            // บันทึกข้อมูลส่วนตัวอัตโนมัติเมื่อมีการเปลี่ยนแปลง
+            ['gender', 'age', 'weight', 'height', 'activity'].forEach(id => {
+                document.getElementById(id).addEventListener('change', function() {
+                    updateUserProfile();
+                    saveAllData();
+                });
+            });
+        }
+
+        // อัปเดตข้อมูลส่วนตัว
+        function updateUserProfile() {
+            userProfile = {
+                gender: document.getElementById('gender').value,
+                age: parseInt(document.getElementById('age').value) || 30,
+                weight: parseInt(document.getElementById('weight').value) || 65,
+                height: parseInt(document.getElementById('height').value) || 170,
+                activity: parseFloat(document.getElementById('activity').value) || 1.2
+            };
+        }
 
         // ตั้งค่า PWA
         function setupPWA() {
@@ -732,22 +786,18 @@
         }
 
         function calculateBMR() {
-            const gender = document.getElementById('gender').value;
-            const age = parseInt(document.getElementById('age').value);
-            const weight = parseInt(document.getElementById('weight').value);
-            const height = parseInt(document.getElementById('height').value);
-            const activity = parseFloat(document.getElementById('activity').value);
-
+            updateUserProfile();
+            
             // คำนวณ BMR (Basal Metabolic Rate)
             let bmr;
-            if (gender === 'male') {
-                bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+            if (userProfile.gender === 'male') {
+                bmr = 88.362 + (13.397 * userProfile.weight) + (4.799 * userProfile.height) - (5.677 * userProfile.age);
             } else {
-                bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+                bmr = 447.593 + (9.247 * userProfile.weight) + (3.098 * userProfile.height) - (4.330 * userProfile.age);
             }
 
             // คำนวณ TDEE (Total Daily Energy Expenditure)
-            dailyCalorieTarget = Math.round(bmr * activity);
+            dailyCalorieTarget = Math.round(bmr * userProfile.activity);
 
             // แสดงผล
             document.getElementById('bmrResult').style.display = 'block';
@@ -756,7 +806,7 @@
             // แสดงสรุป
             document.getElementById('summarySection').style.display = 'block';
             updateSummary();
-            saveData();
+            saveAllData();
         }
 
         // ตั้งค่าระบบค้นหาอาหาร
@@ -842,14 +892,14 @@
 
             updateFoodList();
             updateSummary();
-            saveData();
+            saveAllData();
         }
 
         function removeFood(index) {
             foodList.splice(index, 1);
             updateFoodList();
             updateSummary();
-            saveData();
+            saveAllData();
         }
 
         function updateFoodList() {
@@ -928,20 +978,31 @@
             }
         }
 
-        function saveData() {
+        // บันทึกข้อมูลทั้งหมดลง LocalStorage
+        function saveAllData() {
             const data = {
                 foodList: foodList,
-                dailyCalorieTarget: dailyCalorieTarget
+                dailyCalorieTarget: dailyCalorieTarget,
+                userProfile: userProfile
             };
             localStorage.setItem('calorieTrackerData', JSON.stringify(data));
         }
 
-        function loadData() {
+        // โหลดข้อมูลทั้งหมดจาก LocalStorage
+        function loadAllData() {
             const savedData = localStorage.getItem('calorieTrackerData');
             if (savedData) {
                 const data = JSON.parse(savedData);
                 foodList = data.foodList || [];
                 dailyCalorieTarget = data.dailyCalorieTarget || 0;
+                userProfile = data.userProfile || userProfile;
+                
+                // โหลดข้อมูลส่วนตัวกลับไปที่ฟอร์ม
+                document.getElementById('gender').value = userProfile.gender;
+                document.getElementById('age').value = userProfile.age;
+                document.getElementById('weight').value = userProfile.weight;
+                document.getElementById('height').value = userProfile.height;
+                document.getElementById('activity').value = userProfile.activity;
                 
                 if (dailyCalorieTarget > 0) {
                     document.getElementById('bmrResult').style.display = 'block';
@@ -950,6 +1011,41 @@
                     updateFoodList();
                     updateSummary();
                 }
+            }
+        }
+
+        // ล้างข้อมูลทั้งหมด
+        function clearAllData() {
+            if (confirm('ต้องการล้างข้อมูลทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้')) {
+                localStorage.removeItem('calorieTrackerData');
+                localStorage.removeItem('installPromptShown');
+                localStorage.removeItem('appInstalled');
+                
+                // รีเซ็ตค่าทั้งหมด
+                foodList = [];
+                dailyCalorieTarget = 0;
+                userProfile = {
+                    gender: 'male',
+                    age: 30,
+                    weight: 65,
+                    height: 170,
+                    activity: 1.2
+                };
+                
+                // รีเซ็ตฟอร์ม
+                document.getElementById('gender').value = 'male';
+                document.getElementById('age').value = 30;
+                document.getElementById('weight').value = 65;
+                document.getElementById('height').value = 170;
+                document.getElementById('activity').value = 1.2;
+                
+                // ซ่อนผลลัพธ์
+                document.getElementById('bmrResult').style.display = 'none';
+                document.getElementById('summarySection').style.display = 'none';
+                
+                updateFoodList();
+                
+                alert('ล้างข้อมูลทั้งหมดเรียบร้อยแล้ว');
             }
         }
     </script>
