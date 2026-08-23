@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>โปรแกรมคำนวณ BMR & TDEE</title>
+    <title>BMR & Food Tracker Pro</title>
     
     <!-- PWA Meta Tags & Links -->
     <link id="manifest-placeholder" rel="manifest" href="./manifest.json">
@@ -12,7 +12,7 @@
     <meta name="theme-color" content="#4f46e5">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="BMR Calculator">
+    <meta name="apple-mobile-web-app-title" content="BMR Tracker">
 
     <!-- Fonts & Tailwind CSS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,6 +28,7 @@
         body {
             background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
             min-height: 100vh;
+            padding-bottom: 80px;
         }
         .card-shadow {
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
@@ -41,137 +42,225 @@
             transform: translateY(0);
             opacity: 1;
         }
+        .active-tab {
+            background-color: #4f46e5 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-3 md:p-6">
 
-    <div class="max-w-xl mx-auto space-y-6">
+    <div class="max-w-2xl mx-auto space-y-4">
         
         <!-- Header -->
-        <div class="bg-white rounded-3xl p-6 text-center card-shadow relative overflow-hidden">
-            <div class="absolute -top-12 -right-12 w-32 h-32 bg-indigo-100 rounded-full blur-2xl"></div>
-            <img src="./cal.png" alt="Logo" class="w-20 h-20 mx-auto mb-3 rounded-2xl shadow-md object-cover" onerror="this.src='https://via.placeholder.com/80?text=App'">
-            <h1 class="text-2xl font-bold text-gray-800">คำนวณ BMR & TDEE</h1>
-            <p class="text-sm text-gray-500 mt-1">วางแผนโภชนาการและพลังงานสอดคล้องกับเป้าหมายของคุณ</p>
+        <div class="bg-white rounded-3xl p-5 text-center card-shadow relative overflow-hidden flex items-center justify-between">
+            <div class="flex items-center space-x-3 text-left">
+                <img src="./cal.png" alt="Logo" class="w-14 h-14 rounded-2xl shadow-md object-cover" onerror="this.src='https://via.placeholder.com/80?text=App'">
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">BMR & Nutrition Tracker</h1>
+                    <p class="text-xs text-gray-500">บันทึกอาหาร & คำนวณแคลอรีประจำวัน</p>
+                </div>
+            </div>
+            <button onclick="resetDailyData()" class="text-xs text-red-500 bg-red-50 hover:bg-red-100 px-3 py-2 rounded-xl font-medium transition">
+                ↺ รีเซ็ตวัน
+            </button>
         </div>
 
-        <!-- Form Input Card -->
-        <div class="bg-white rounded-3xl p-6 card-shadow">
-            <form id="calcForm" class="space-y-4">
-                
-                <!-- Gender -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">เพศ</label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <label class="cursor-pointer">
-                            <input type="radio" name="gender" value="male" checked class="peer hidden">
-                            <div class="p-3 text-center rounded-xl border border-gray-200 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 peer-checked:text-indigo-600 font-medium text-gray-600 transition">
-                                👨 ชาย
-                            </div>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="gender" value="female" class="peer hidden">
-                            <div class="p-3 text-center rounded-xl border border-gray-200 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 peer-checked:text-indigo-600 font-medium text-gray-600 transition">
-                                👩 หญิง
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Age, Weight, Height -->
-                <div class="grid grid-cols-3 gap-3">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">อายุ (ปี)</label>
-                        <input type="number" id="age" required placeholder="25" min="1" max="120" class="w-full p-3 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 text-center">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">น้ำหนัก (kg)</label>
-                        <input type="number" id="weight" step="0.1" required placeholder="65" min="1" max="300" class="w-full p-3 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 text-center">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">ส่วนสูง (cm)</label>
-                        <input type="number" id="height" required placeholder="170" min="50" max="250" class="w-full p-3 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 text-center">
-                    </div>
-                </div>
-
-                <!-- Activity Level -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">กิจกรรมประจำวัน</label>
-                    <select id="activity" class="w-full p-3 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 bg-white text-sm">
-                        <option value="1.2">นั่งทำงานอยู่กับที่ / ไม่ได้ออกกำลังกาย</option>
-                        <option value="1.375">ออกกำลังกายเบาๆ (1-3 วัน/สัปดาห์)</option>
-                        <option value="1.55">ออกกำลังกายปานกลาง (3-5 วัน/สัปดาห์)</option>
-                        <option value="1.725">ออกกำลังกายหนัก (6-7 วัน/สัปดาห์)</option>
-                        <option value="1.9">ออกกำลังกายหนักมาก / นักกีฬา</option>
-                    </select>
-                </div>
-
-                <!-- Goal & Timeline -->
-                <div class="grid grid-cols-2 gap-3 pt-2">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">น้ำหนักเป้าหมาย (kg)</label>
-                        <input type="number" id="targetWeight" step="0.1" placeholder="60" class="w-full p-3 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 text-center">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">ระยะเวลา (วัน)</label>
-                        <input type="number" id="targetDays" placeholder="30" class="w-full p-3 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 text-center">
-                    </div>
-                </div>
-
-                <!-- Submit Button -->
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white font-semibold p-3.5 rounded-xl transition duration-200 shadow-md shadow-indigo-200 mt-2">
-                    คำนวณผลลัพธ์
-                </button>
-            </form>
+        <!-- Navigation Tabs -->
+        <div class="bg-white/80 backdrop-blur-md p-1.5 rounded-2xl card-shadow flex space-x-1 sticky top-3 z-40 border border-white">
+            <button id="tab-calc-btn" onclick="switchTab('calc')" class="flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-gray-600 transition active-tab">
+                🧮 คำนวณ TDEE
+            </button>
+            <button id="tab-food-btn" onclick="switchTab('food')" class="flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-gray-600 transition">
+                🍲 เลือกอาหาร
+            </button>
+            <button id="tab-summary-btn" onclick="switchTab('summary')" class="flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-gray-600 transition relative">
+                📊 สรุปผล
+                <span id="badge-count" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
+            </button>
         </div>
 
-        <!-- Result Card -->
-        <div id="results" class="hidden bg-white rounded-3xl p-6 card-shadow space-y-5">
-            <h2 class="text-xl font-bold text-gray-800 border-b pb-3 text-center">ผลการคำนวณ</h2>
+        <!-- ==================== TAB 1: BMR/TDEE CALCULATOR ==================== -->
+        <div id="tab-calc" class="tab-content space-y-4">
+            <div class="bg-white rounded-3xl p-6 card-shadow">
+                <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <span>📐</span> ตั้งค่าร่างกายและเป้าหมาย
+                </h2>
+                <form id="calcForm" class="space-y-4">
+                    <!-- Gender -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">เพศ</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="gender" value="male" checked class="peer hidden">
+                                <div class="p-3 text-center rounded-xl border border-gray-200 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 peer-checked:text-indigo-600 font-medium text-gray-600 text-sm transition">
+                                    👨 ชาย
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="gender" value="female" class="peer hidden">
+                                <div class="p-3 text-center rounded-xl border border-gray-200 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 peer-checked:text-indigo-600 font-medium text-gray-600 text-sm transition">
+                                    👩 หญิง
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Age, Weight, Height -->
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">อายุ (ปี)</label>
+                            <input type="number" id="age" value="25" required min="1" max="120" class="w-full p-3 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 text-center font-semibold text-gray-800">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">น้ำหนัก (kg)</label>
+                            <input type="number" id="weight" value="65" step="0.1" required min="1" max="300" class="w-full p-3 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 text-center font-semibold text-gray-800">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">ส่วนสูง (cm)</label>
+                            <input type="number" id="height" value="170" required min="50" max="250" class="w-full p-3 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 text-center font-semibold text-gray-800">
+                        </div>
+                    </div>
+
+                    <!-- Activity Level -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">กิจกรรมประจำวัน</label>
+                        <select id="activity" class="w-full p-3 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 bg-white text-xs font-medium">
+                            <option value="1.2">นั่งทำงานอยู่กับที่ / ไม่ได้ออกกำลังกาย</option>
+                            <option value="1.375">ออกกำลังกายเบาๆ (1-3 วัน/สัปดาห์)</option>
+                            <option value="1.55" selected>ออกกำลังกายปานกลาง (3-5 วัน/สัปดาห์)</option>
+                            <option value="1.725">ออกกำลังกายหนัก (6-7 วัน/สัปดาห์)</option>
+                            <option value="1.9">ออกกำลังกายหนักมาก / นักกีฬา</option>
+                        </select>
+                    </div>
+
+                    <!-- Goal & Timeline -->
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">น้ำหนักเป้าหมาย (kg)</label>
+                            <input type="number" id="targetWeight" value="60" step="0.1" class="w-full p-3 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 text-center font-semibold text-gray-800">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">ระยะเวลา (วัน)</label>
+                            <input type="number" id="targetDays" value="30" class="w-full p-3 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 text-center font-semibold text-gray-800">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white font-semibold p-3.5 rounded-xl transition duration-200 shadow-md shadow-indigo-200">
+                        บันทึกเป้าหมาย & คำนวณ
+                    </button>
+                </form>
+            </div>
+
+            <!-- BMR Result Output Card -->
+            <div id="results" class="bg-white rounded-3xl p-6 card-shadow space-y-4">
+                <h3 class="text-md font-bold text-gray-800 border-b pb-2 text-center">พลังงานเป้าหมายของคุณ</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-indigo-50 p-3 rounded-2xl text-center">
+                        <p class="text-[11px] text-indigo-600 font-medium">BMR (ขั้นต่ำ)</p>
+                        <p id="bmrVal" class="text-xl font-bold text-indigo-900">1,500</p>
+                        <p class="text-[10px] text-gray-400">kcal/วัน</p>
+                    </div>
+                    <div class="bg-emerald-50 p-3 rounded-2xl text-center">
+                        <p class="text-[11px] text-emerald-600 font-medium">TDEE (ใช้จริง)</p>
+                        <p id="tdeeVal" class="text-xl font-bold text-emerald-900">2,000</p>
+                        <p class="text-[10px] text-gray-400">kcal/วัน</p>
+                    </div>
+                </div>
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center">
+                    <p class="text-xs text-amber-700 font-medium">เป้าหมายแคลอรีที่แนะนำให้กินต่อวัน</p>
+                    <p id="targetCalVal" class="text-3xl font-bold text-amber-900 my-1">1,800</p>
+                    <p id="goalNote" class="text-xs text-amber-800">kcal/วัน</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB 2: FOOD SELECTION ==================== -->
+        <div id="tab-food" class="tab-content hidden space-y-4">
+            <!-- Search & Filter Bar -->
+            <div class="bg-white rounded-3xl p-4 card-shadow space-y-3">
+                <div class="relative">
+                    <input type="text" id="foodSearch" oninput="filterFoods()" placeholder="🔍 ค้นชื่ออาหาร, ข้าวผัด, ชานม, ส้มตำ..." class="w-full p-3 pl-4 pr-10 rounded-2xl border border-gray-200 focus:outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <!-- Categories -->
+                <div class="flex space-x-2 overflow-x-auto pb-1 text-xs">
+                    <button onclick="setCategory('all')" id="cat-all" class="cat-btn px-3 py-1.5 rounded-xl font-medium bg-indigo-600 text-white whitespace-nowrap">ทั้งหมด</button>
+                    <button onclick="setCategory('main')" id="cat-main" class="cat-btn px-3 py-1.5 rounded-xl font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap">🍱 มื้อหลัก</button>
+                    <button onclick="setCategory('snack')" id="cat-snack" class="cat-btn px-3 py-1.5 rounded-xl font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap">🍰 ของทานเล่น</button>
+                    <button onclick="setCategory('drink')" id="cat-drink" class="cat-btn px-3 py-1.5 rounded-xl font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap">🧋 เครื่องดื่ม</button>
+                </div>
+            </div>
+
+            <!-- Food List Grid -->
+            <div id="foodGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- Food items generated via JS -->
+            </div>
+        </div>
+
+        <!-- ==================== TAB 3: DAILY SUMMARY ==================== -->
+        <div id="tab-summary" class="tab-content hidden space-y-4">
             
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-indigo-50 p-4 rounded-2xl text-center">
-                    <p class="text-xs text-indigo-600 font-medium mb-1">BMR (พลังงานขั้นต่ำ)</p>
-                    <p id="bmrVal" class="text-2xl font-bold text-indigo-900">0</p>
-                    <p class="text-xs text-gray-500 mt-1">kcal/วัน</p>
+            <!-- Dashboard Overview Card -->
+            <div class="bg-white rounded-3xl p-6 card-shadow space-y-5">
+                <h2 class="text-lg font-bold text-gray-800 flex items-center justify-between">
+                    <span>📊 สรุปโภชนาการวันนี้</span>
+                    <span id="summaryDate" class="text-xs font-normal text-gray-500"></span>
+                </h2>
+
+                <!-- Calorie Balance Meter -->
+                <div class="grid grid-cols-3 gap-2 text-center border-b pb-4">
+                    <div>
+                        <p class="text-xs text-gray-500">เป้าหมาย</p>
+                        <p id="sumTargetCal" class="text-lg font-bold text-gray-800">0</p>
+                        <p class="text-[10px] text-gray-400">kcal</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-indigo-600 font-medium">ทานไปแล้ว</p>
+                        <p id="sumEatenCal" class="text-xl font-bold text-indigo-600">0</p>
+                        <p class="text-[10px] text-gray-400">kcal</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-emerald-600 font-medium">คงเหลือ</p>
+                        <p id="sumRemainCal" class="text-lg font-bold text-emerald-600">0</p>
+                        <p class="text-[10px] text-gray-400">kcal</p>
+                    </div>
                 </div>
-                <div class="bg-emerald-50 p-4 rounded-2xl text-center">
-                    <p class="text-xs text-emerald-600 font-medium mb-1">TDEE (พลังงานที่ใช้)</p>
-                    <p id="tdeeVal" class="text-2xl font-bold text-emerald-900">0</p>
-                    <p class="text-xs text-gray-500 mt-1">kcal/วัน</p>
+
+                <!-- Progress Bar -->
+                <div>
+                    <div class="flex justify-between text-xs text-gray-600 mb-1">
+                        <span>ความคืบหน้าแคลอรี</span>
+                        <span id="calPercentText" class="font-bold">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                        <div id="calProgressBar" class="bg-indigo-600 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Macros Breakdown Progress -->
+                <div class="grid grid-cols-3 gap-3 pt-2">
+                    <div class="bg-blue-50 p-3 rounded-2xl text-center">
+                        <p class="text-[11px] text-blue-700 font-medium">🥩 โปรตีน</p>
+                        <p id="sumProtein" class="text-base font-bold text-blue-900 mt-1">0g</p>
+                    </div>
+                    <div class="bg-amber-50 p-3 rounded-2xl text-center">
+                        <p class="text-[11px] text-amber-700 font-medium">🍚 คาร์โบไฮเดรต</p>
+                        <p id="sumCarbs" class="text-base font-bold text-amber-900 mt-1">0g</p>
+                    </div>
+                    <div class="bg-rose-50 p-3 rounded-2xl text-center">
+                        <p class="text-[11px] text-rose-700 font-medium">🥑 ไขมัน</p>
+                        <p id="sumFat" class="text-base font-bold text-rose-900 mt-1">0g</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Target Goal Result -->
-            <div id="goalPlan" class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center">
-                <p class="text-xs text-amber-700 font-medium">คำแนะนำพลังงานตามเป้าหมาย</p>
-                <p id="targetCalVal" class="text-3xl font-bold text-amber-900 my-1">0</p>
-                <p id="goalNote" class="text-xs text-amber-800">kcal/วัน</p>
-            </div>
-
-            <!-- Macros Breakdown -->
-            <div>
-                <p class="text-sm font-medium text-gray-700 mb-2">สารอาหารที่แนะนำต่อวัน (Macros)</p>
-                <div class="grid grid-cols-3 gap-2 text-center text-xs">
-                    <div class="p-3 bg-gray-50 rounded-xl border">
-                        <p class="text-gray-500">โปรตีน</p>
-                        <p id="proteinVal" class="font-bold text-gray-800 text-sm mt-1">0g</p>
-                    </div>
-                    <div class="p-3 bg-gray-50 rounded-xl border">
-                        <p class="text-gray-500">คาร์บ</p>
-                        <p id="carbsVal" class="font-bold text-gray-800 text-sm mt-1">0g</p>
-                    </div>
-                    <div class="p-3 bg-gray-50 rounded-xl border">
-                        <p class="text-gray-500">ไขมัน</p>
-                        <p id="fatVal" class="font-bold text-gray-800 text-sm mt-1">0g</p>
-                    </div>
+            <!-- Eaten Food Log List -->
+            <div class="bg-white rounded-3xl p-6 card-shadow space-y-4">
+                <h3 class="text-sm font-bold text-gray-800">รายการที่ทานวันนี้</h3>
+                <div id="eatenLogList" class="space-y-2 divide-y divide-gray-100">
+                    <p class="text-xs text-gray-400 text-center py-4">ยังไม่ได้บันทึกรายการอาหารวันนี้ค่ะ</p>
                 </div>
-            </div>
-
-            <!-- Water Intake -->
-            <div class="p-3 bg-blue-50 rounded-xl flex items-center justify-between text-xs text-blue-800">
-                <span>💧 น้ำดื่มที่ควรได้รับต่อวัน:</span>
-                <span id="waterVal" class="font-bold text-sm">0 ลิตร</span>
             </div>
         </div>
 
@@ -183,7 +272,7 @@
             <img src="./cal.png" class="w-12 h-12 rounded-xl object-cover" alt="App Icon">
             <div>
                 <p class="font-bold text-sm text-gray-800">ติดตั้งแอปพลิเคชัน</p>
-                <p class="text-xs text-gray-500">ใช้งานได้รวดเร็วแบบ Offline</p>
+                <p class="text-xs text-gray-500">ใช้งานได้สะดวก รวดเร็ว แบบ Offline</p>
             </div>
         </div>
         <div class="flex space-x-2">
@@ -193,99 +282,365 @@
     </div>
 
     <script>
-        let deferredPrompt;
+        // =========================================================
+        // 1. DATABASE: รายการอาหารกว่า 180+ รายการ
+        // =========================================================
+        const foodDatabase = [
+            // --- มื้อหลัก (MAIN) ---
+            { id: 1, name: "ข้าวมันไก่", cal: 590, p: 24, c: 62, f: 28, cat: "main" },
+            { id: 2, name: "ข้าวมันไก่ทอด", cal: 690, p: 22, c: 68, f: 36, cat: "main" },
+            { id: 3, name: "ข้าวหมูกรอบ", cal: 680, p: 18, c: 60, f: 40, cat: "main" },
+            { id: 4, name: "ข้าวหมูแดง", cal: 540, p: 20, c: 65, f: 22, cat: "main" },
+            { id: 5, name: "ข้าวขาหมู", cal: 690, p: 22, c: 58, f: 42, cat: "main" },
+            { id: 6, name: "ข้าวผัดหมูใส่ไข่", cal: 550, p: 18, c: 65, f: 24, cat: "main" },
+            { id: 7, name: "ข้าวผัดปู", cal: 510, p: 20, c: 62, f: 20, cat: "main" },
+            { id: 8, name: "ข้าวผัดกุ้ง", cal: 520, p: 22, c: 62, f: 20, cat: "main" },
+            { id: 9, name: "ข้าวกะเพราไก่ + ไข่ดาว", cal: 630, p: 28, c: 55, f: 32, cat: "main" },
+            { id: 10, name: "ข้าวกะเพราหมูสับ + ไข่ดาว", cal: 660, p: 26, c: 55, f: 36, cat: "main" },
+            { id: 11, name: "ข้าวกะเพราเนื้อ + ไข่ดาว", cal: 670, p: 28, c: 55, f: 37, cat: "main" },
+            { id: 12, name: "ข้าวกะเพราหมูกรอบ", cal: 720, p: 20, c: 55, f: 48, cat: "main" },
+            { id: 13, name: "ข้าวไข่เจียวหมูสับ", cal: 560, p: 16, c: 50, f: 34, cat: "main" },
+            { id: 14, name: "ข้าวหน้าเป็ด", cal: 520, p: 22, c: 58, f: 22, cat: "main" },
+            { id: 15, name: "ข้าวคลุกกะปิ", cal: 570, p: 20, c: 62, f: 26, cat: "main" },
+            { id: 16, name: "ข้าวราดแกงเขียวหวานไก่", cal: 480, p: 18, c: 55, f: 22, cat: "main" },
+            { id: 17, name: "ข้าวราดพะแนงหมู", cal: 520, p: 20, c: 55, f: 25, cat: "main" },
+            { id: 18, name: "ข้าวไข่ข้นกุ้ง", cal: 490, p: 22, c: 50, f: 22, cat: "main" },
+            { id: 19, name: "ข้าวยำไก่แซ่บ", cal: 580, p: 24, c: 60, f: 26, cat: "main" },
+            { id: 20, name: "ผัดไทยกุ้งสด", cal: 550, p: 20, c: 65, f: 24, cat: "main" },
+            { id: 21, name: "ผัดซีอิ๊วหมู", cal: 600, p: 22, c: 62, f: 30, cat: "main" },
+            { id: 22, name: "ราดหน้าหมูหมัก", cal: 420, p: 18, c: 52, f: 16, cat: "main" },
+            { id: 23, name: "ก๋วยเตี๋ยวเรือน้ำตกหมู", cal: 280, p: 16, c: 32, f: 10, cat: "main" },
+            { id: 24, name: "ก๋วยเตี๋ยวต้มยำสุโขทัย", cal: 320, p: 15, c: 42, f: 11, cat: "main" },
+            { id: 25, name: "ก๋วยเตี๋ยวเย็นตาโฟ", cal: 350, p: 16, c: 48, f: 10, cat: "main" },
+            { id: 26, name: "ก๋วยจั๊บน้ำข้น", cal: 420, p: 20, c: 45, f: 18, cat: "main" },
+            { id: 27, name: "บะหมี่เกี๊ยวหมูแดง", cal: 380, p: 18, c: 48, f: 13, cat: "main" },
+            { id: 28, name: "ขนมจีนน้ำยาป่า", cal: 230, p: 10, c: 38, f: 4, cat: "main" },
+            { id: 29, name: "ขนมจีนน้ำยากะทิ", cal: 380, p: 12, c: 42, f: 18, cat: "main" },
+            { id: 30, name: "ขนมจีนเขียวหวานไก่", cal: 450, p: 16, c: 45, f: 22, cat: "main" },
+            { id: 31, name: "ส้มตำไทย", cal: 120, p: 3, c: 26, f: 1, cat: "main" },
+            { id: 32, name: "ส้มตำปูปลาร้า", cal: 90, p: 3, c: 18, f: 1, cat: "main" },
+            { id: 33, name: "ลาบหมู", cal: 160, p: 18, c: 6, f: 8, cat: "main" },
+            { id: 34, name: "น้ำตกหมู", cal: 180, p: 18, c: 5, f: 10, cat: "main" },
+            { id: 35, name: "ต้มแซ่บกระดูกหมู", cal: 200, p: 16, c: 6, f: 13, cat: "main" },
+            { id: 36, name: "ไก่ย่าง (1 สะโพก)", cal: 180, p: 22, c: 2, f: 10, cat: "main" },
+            { id: 37, name: "คอหมูย่าง (1 จาน)", cal: 320, p: 20, c: 2, f: 26, cat: "main" },
+            { id: 38, name: "ข้าวเหนียว (1 ถุง/100g)", cal: 230, p: 4, c: 50, f: 1, cat: "main" },
+            { id: 39, name: "ข้าวสวย (1 ทัพพี)", cal: 80, p: 2, c: 18, f: 0, cat: "main" },
+            { id: 40, name: "ต้มยำกุ้งน้ำใส", cal: 120, p: 16, c: 6, f: 3, cat: "main" },
+            { id: 41, name: "ต้มยำกุ้งน้ำข้น", cal: 220, p: 18, c: 10, f: 12, cat: "main" },
+            { id: 42, name: "แกงส้มชะอมกุ้ง", cal: 270, p: 16, c: 12, f: 18, cat: "main" },
+            { id: 43, name: "แกงจืดเต้าหู้หมูสับ", cal: 120, p: 10, c: 4, f: 7, cat: "main" },
+            { id: 44, name: "ไข่พะโล้ (2 ฟอง + หมู)", cal: 380, p: 22, c: 16, f: 24, cat: "main" },
+            { id: 45, name: "หมูกระทะ (ชุดกลางเฉลี่ย/คน)", cal: 750, p: 45, c: 30, f: 50, cat: "main" },
+            { id: 46, name: "ชาบูน้ำดำ (เฉลี่ย/คน)", cal: 550, p: 40, c: 25, f: 30, cat: "main" },
+            { id: 47, name: "สเต๊กไก่พริกไทยดำ", cal: 380, p: 35, c: 12, f: 20, cat: "main" },
+            { id: 48, name: "สเต๊กหมูซอสบาร์บีคิว", cal: 480, p: 32, c: 18, f: 30, cat: "main" },
+            { id: 49, name: "สปาเกตตีคาโบนาร่า", cal: 650, p: 20, c: 58, f: 38, cat: "main" },
+            { id: 50, name: "สปาเกตตีขี้เมาทะเล", cal: 450, p: 22, c: 55, f: 16, cat: "main" },
+            { id: 51, name: "พิซซ่าถาดกลาง (1 ชิ้น)", cal: 280, p: 12, c: 30, f: 12, cat: "main" },
+            { id: 52, name: "เบอร์เกอร์หมู", cal: 380, p: 18, c: 34, f: 20, cat: "main" },
+            { id: 53, name: "ข้าวหน้าเนื้อโดนบุรี", cal: 580, p: 26, c: 65, f: 22, cat: "main" },
+            { id: 54, name: "ราเมงต้มยำหมูชาชู", cal: 520, p: 22, c: 58, f: 22, cat: "main" },
+            { id: 55, name: "ซูชิแซลมอน (1 คำ)", cal: 60, p: 3, c: 8, f: 2, cat: "main" },
+            { id: 56, name: "ข้าวแกงกะหรี่หมูทอด", cal: 850, p: 28, c: 90, f: 40, cat: "main" },
+            { id: 57, name: "ก๋วยเตี๋ยวคั่วไก่", cal: 520, p: 22, c: 52, f: 24, cat: "main" },
+            { id: 58, name: "มักกะโรนีผัดกุ้ง", cal: 460, p: 20, c: 54, f: 18, cat: "main" },
+            { id: 59, name: "สุกี้น้ำหมู", cal: 280, p: 20, c: 22, f: 11, cat: "main" },
+            { id: 60, name: "สุกี้แห้งทะเล", cal: 420, p: 24, c: 32, f: 22, cat: "main" },
+
+            // --- ของทานเล่น / ของหวาน (SNACK) ---
+            { id: 61, name: "ลูกชิ้นหมูทอด (5 ลูก)", cal: 250, p: 8, c: 18, f: 16, cat: "snack" },
+            { id: 62, name: "ลูกชิ้นปิ้ง (5 ลูก)", cal: 160, p: 10, c: 15, f: 6, cat: "snack" },
+            { id: 63, name: "ไส้กรอกอีสาน (3 ไม้)", cal: 320, p: 12, c: 10, f: 26, cat: "snack" },
+            { id: 64, name: "เกี๊ยวซ่าทอด (5 ชิ้น)", cal: 280, p: 10, c: 26, f: 15, cat: "snack" },
+            { id: 65, name: "เฟรนช์ฟรายส์ (กลาง)", cal: 340, p: 4, c: 42, f: 17, cat: "snack" },
+            { id: 66, name: "กล้วยทอด/กล้วยแขก (5 ชิ้น)", cal: 290, p: 2, c: 42, f: 13, cat: "snack" },
+            { id: 67, name: "ปาท่องโก๋ (2 คู่)", cal: 240, p: 4, c: 28, f: 12, cat: "snack" },
+            { id: 68, name: "ซาลาเปาไส้หมูสับ (1 ลูก)", cal: 210, p: 7, c: 30, f: 7, cat: "snack" },
+            { id: 69, name: "ขนมจีบหมู (5 ลูก)", cal: 180, p: 10, c: 12, f: 10, cat: "snack" },
+            { id: 70, name: "ข้าวเหนียวมะม่วง (1 จาน)", cal: 380, p: 4, c: 72, f: 9, cat: "snack" },
+            { id: 71, name: "เฉาก๊วยนมสด", cal: 210, p: 3, c: 38, f: 5, cat: "snack" },
+            { id: 72, name: "บัวลอยไข่หวาน", cal: 280, p: 5, c: 48, f: 8, cat: "snack" },
+            { id: 73, name: "โรตีราดนมข้น", cal: 350, p: 6, c: 46, f: 16, cat: "snack" },
+            { id: 74, name: "ทองหยอด (5 ชิ้น)", cal: 220, p: 3, c: 45, f: 3, cat: "snack" },
+            { id: 75, name: "ฝอยทอง (1 แพ)", cal: 180, p: 3, c: 34, f: 4, cat: "snack" },
+            { id: 76, name: "ขนมครก (5 คู่)", cal: 210, p: 3, c: 28, f: 10, cat: "snack" },
+            { id: 77, name: "เค้กช็อกโกแลต (1 ชิ้น)", cal: 350, p: 5, c: 45, f: 17, cat: "snack" },
+            { id: 78, name: "บราวนี่ (1 ชิ้น)", cal: 250, p: 3, c: 32, f: 12, cat: "snack" },
+            { id: 79, name: "ไอศกรีมกะทิ (1 ถ้วย)", cal: 220, p: 3, c: 28, f: 11, cat: "snack" },
+            { id: 80, name: "ไอศกรีมวานิลลา (1 สกู๊ป)", cal: 140, p: 3, c: 16, f: 7, cat: "snack" },
+            { id: 81, name: "โดนัทไส้ครีม (1 ชิ้น)", cal: 280, p: 4, c: 34, f: 14, cat: "snack" },
+            { id: 82, name: "ครัวซองต์เนยสด (1 ชิ้น)", cal: 260, p: 5, c: 26, f: 15, cat: "snack" },
+            { id: 83, name: "ฝรั่ง (1 ลูก)", cal: 120, p: 2, c: 28, f: 1, cat: "snack" },
+            { id: 84, name: "แอปเปิล (1 ลูก)", cal: 80, p: 0, c: 20, f: 0, cat: "snack" },
+            { id: 85, name: "กล้วยหอม (1 ลูก)", cal: 120, p: 1, c: 30, f: 0, cat: "snack" },
+            { id: 86, name: "แตงโม (5 ชิ้นคำ)", cal: 60, p: 1, c: 14, f: 0, cat: "snack" },
+            { id: 87, name: "มะละกอสุก (5 ชิ้นคำ)", cal: 80, p: 1, c: 19, f: 0, cat: "snack" },
+            { id: 88, name: "ส้มหวาน (1 ลูก)", cal: 60, p: 1, c: 14, f: 0, cat: "snack" },
+            { id: 89, name: "ถั่วลิสงคั่ว (1 ซองเล็ก/30g)", cal: 160, p: 7, c: 6, f: 13, cat: "snack" },
+            { id: 90, name: "ป๊อปคอร์นรสเนย (ถุงเล็ก)", cal: 220, p: 3, c: 24, f: 12, cat: "snack" },
+
+            // --- เครื่องดื่ม (DRINK) ---
+            { id: 101, name: "อเมริกาโน่เย็น (ไม่หวาน)", cal: 15, p: 0, c: 2, f: 0, cat: "drink" },
+            { id: 102, name: "อเมริกาโน่เย็น (หวานปกติ)", cal: 120, p: 0, c: 28, f: 0, cat: "drink" },
+            { id: 103, name: "ลาเต้เย็น", cal: 180, p: 6, c: 20, f: 8, cat: "drink" },
+            { id: 104, name: "คาปูชิโน่เย็น", cal: 200, p: 6, c: 24, f: 9, cat: "drink" },
+            { id: 105, name: "เอสเปรสโซ่เย็น (ไทยสไตล์)", cal: 230, p: 5, c: 32, f: 10, cat: "drink" },
+            { id: 106, name: "ชาไทยเย็น / ชานมเย็น", cal: 280, p: 4, c: 42, f: 11, cat: "drink" },
+            { id: 107, name: "ชาเขียวนมเย็น", cal: 270, p: 4, c: 40, f: 10, cat: "drink" },
+            { id: 108, name: "ชานมไข่มุก", cal: 360, p: 3, c: 58, f: 13, cat: "drink" },
+            { id: 109, name: "โกโก้เย็น / ช็อคโกแลตเย็น", cal: 300, p: 5, c: 44, f: 12, cat: "drink" },
+            { id: 110, name: "นมสดเย็น", cal: 180, p: 8, c: 14, f: 10, cat: "drink" },
+            { id: 111, name: "น้ำอัดลมกระป๋อง (325ml)", cal: 140, p: 0, c: 35, f: 0, cat: "drink" },
+            { id: 112, name: "น้ำอัดลม สูตรไม่มีน้ำตาล", cal: 0, p: 0, c: 0, f: 0, cat: "drink" },
+            { id: 113, name: "น้ำส้มคั้นสด (1 แก้ว)", cal: 120, p: 1, c: 28, f: 0, cat: "drink" },
+            { id: 114, name: "น้ำมะพร้าวสด", cal: 80, p: 1, c: 18, f: 0, cat: "drink" },
+            { id: 115, name: "น้ำเขียว/น้ำแดงโซดา", cal: 150, p: 0, c: 38, f: 0, cat: "drink" },
+            { id: 116, name: "ชามะนาวเย็น", cal: 160, p: 0, c: 40, f: 0, cat: "drink" },
+            { id: 117, name: "เครื่องดื่มชูกำลัง (1 ขวด)", cal: 100, p: 0, c: 25, f: 0, cat: "drink" },
+            { id: 118, name: "นมเปรี้ยว (ขวดเล็ก)", cal: 90, p: 2, c: 18, f: 1, cat: "drink" },
+            { id: 119, name: "น้ำเต้าหู้หวานน้อย", cal: 120, p: 7, c: 12, f: 4, cat: "drink" },
+            { id: 120, name: "สมูทตี้สตอเบอร์รี่", cal: 220, p: 2, c: 50, f: 1, cat: "drink" },
+            { id: 121, name: "เบอร์กี้ 1 กระป๋อง", cal: 150, p: 1, c: 12, f: 0, cat: "drink" }
+        ];
+
+        // =========================================================
+        // 2. STATE MANAGEMENT
+        // =========================================================
+        let currentCategory = 'all';
+        let targetCalories = parseInt(localStorage.getItem('targetCalories')) || 1800;
+        let eatenLogs = JSON.parse(localStorage.getItem('eatenLogs')) || [];
 
         document.addEventListener('DOMContentLoaded', () => {
             setupPWA();
-            
+            renderFoodGrid();
+            renderSummary();
+
             document.getElementById('calcForm').addEventListener('submit', (e) => {
                 e.preventDefault();
-                calculateBMR();
+                calculateAndSaveTDEE();
             });
 
             document.getElementById('installBtn').addEventListener('click', async () => {
                 if (deferredPrompt) {
                     deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    console.log(`User response to install prompt: ${outcome}`);
                     deferredPrompt = null;
                     document.getElementById('installPopup').classList.remove('show');
                 }
             });
         });
 
-        // BMR Calculation (Mifflin-St Jeor Equation)
-        function calculateBMR() {
+        // Tab Switching Logic
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.backdrop-blur-md button').forEach(btn => btn.classList.remove('active-tab'));
+
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabName}-btn`).classList.add('active-tab');
+
+            if (tabName === 'summary') {
+                renderSummary();
+            }
+        }
+
+        // =========================================================
+        // 3. CALCULATION & TARGET SETTING
+        // =========================================================
+        function calculateAndSaveTDEE() {
             const gender = document.querySelector('input[name="gender"]:checked').value;
             const age = parseFloat(document.getElementById('age').value);
             const weight = parseFloat(document.getElementById('weight').value);
             const height = parseFloat(document.getElementById('height').value);
             const activity = parseFloat(document.getElementById('activity').value);
-            
             const targetWeight = parseFloat(document.getElementById('targetWeight').value);
             const targetDays = parseFloat(document.getElementById('targetDays').value);
 
             let bmr = (10 * weight) + (6.25 * height) - (5 * age);
             bmr = (gender === 'male') ? bmr + 5 : bmr - 161;
-
             const tdee = bmr * activity;
 
-            document.getElementById('bmrVal').textContent = Math.round(bmr).toLocaleString();
-            document.getElementById('tdeeVal').textContent = Math.round(tdee).toLocaleString();
-
-            // Calorie Target based on Weight Goal
             let targetCal = tdee;
             let noteText = "สำหรับรักษาน้ำหนักปัจจุบัน";
 
             if (targetWeight && targetDays && targetDays > 0) {
-                const weightDiff = targetWeight - weight; // Negative for loss, positive for gain
-                const totalCalDiff = weightDiff * 7700; // 1kg fat ~= 7700 kcal
-                const dailyCalDiff = totalCalDiff / targetDays;
-                
+                const weightDiff = targetWeight - weight;
+                const dailyCalDiff = (weightDiff * 7700) / targetDays;
                 targetCal = tdee + dailyCalDiff;
 
-                if (weightDiff < 0) {
-                    noteText = `สำหรับลดน้ำหนักให้เหลือ ${targetWeight} kg ใน ${targetDays} วัน`;
-                } else if (weightDiff > 0) {
-                    noteText = `สำหรับเพิ่มน้ำหนักให้ได้ ${targetWeight} kg ใน ${targetDays} วัน`;
-                }
+                if (weightDiff < 0) noteText = `เพื่อลดน้ำหนักให้ได้ ${targetWeight} kg ใน ${targetDays} วัน`;
+                else if (weightDiff > 0) noteText = `เพื่อเพิ่มน้ำหนักให้ได้ ${targetWeight} kg ใน ${targetDays} วัน`;
             }
 
-            document.getElementById('targetCalVal').textContent = Math.round(targetCal).toLocaleString();
+            targetCalories = Math.round(targetCal);
+            localStorage.setItem('targetCalories', targetCalories);
+
+            document.getElementById('bmrVal').textContent = Math.round(bmr).toLocaleString();
+            document.getElementById('tdeeVal').textContent = Math.round(tdee).toLocaleString();
+            document.getElementById('targetCalVal').textContent = targetCalories.toLocaleString();
             document.getElementById('goalNote').textContent = noteText;
 
-            // Macronutrient Distribution (40% Carbs, 30% Protein, 30% Fat)
-            const proteinGrams = Math.round((targetCal * 0.30) / 4);
-            const carbsGrams = Math.round((targetCal * 0.40) / 4);
-            const fatGrams = Math.round((targetCal * 0.30) / 9);
-
-            document.getElementById('proteinVal').textContent = `${proteinGrams}g`;
-            document.getElementById('carbsVal').textContent = `${carbsGrams}g`;
-            document.getElementById('fatVal').textContent = `${fatGrams}g`;
-
-            // Water Recommendation (Weight in kg * 0.033)
-            const waterLiters = (weight * 0.033).toFixed(1);
-            document.getElementById('waterVal').textContent = `${waterLiters} ลิตร`;
-
-            // Show Result Section
-            document.getElementById('results').classList.remove('hidden');
-            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+            alert('บันทึกเป้าหมายเรียบร้อยแล้วค่ะคุณชินอิจิ!');
+            switchTab('food');
         }
 
-        // PWA Setup
+        // =========================================================
+        // 4. FOOD DATABASE & TRACKING
+        // =========================================================
+        function renderFoodGrid() {
+            const grid = document.getElementById('foodGrid');
+            const searchText = document.getElementById('foodSearch').value.toLowerCase();
+
+            const filtered = foodDatabase.filter(item => {
+                const matchCat = (currentCategory === 'all') || (item.cat === currentCategory);
+                const matchSearch = item.name.toLowerCase().includes(searchText);
+                return matchCat && matchSearch;
+            });
+
+            grid.innerHTML = filtered.map(item => `
+                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex justify-between items-center hover:border-indigo-200 transition">
+                    <div>
+                        <p class="font-bold text-sm text-gray-800">${item.name}</p>
+                        <p class="text-xs text-indigo-600 font-semibold mt-0.5">${item.cal} <span class="text-[10px] text-gray-400 font-normal">kcal</span></p>
+                        <p class="text-[10px] text-gray-400 mt-1">โปรตีน ${item.p}g | คาร์บ ${item.c}g | ไขมัน ${item.f}g</p>
+                    </div>
+                    <button onclick="addFoodToLog(${item.id})" class="bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-600 p-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                        <span>+</span> ทาน
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function filterFoods() {
+            renderFoodGrid();
+        }
+
+        function setCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white');
+                btn.classList.add('bg-gray-100', 'text-gray-600');
+            });
+            document.getElementById(`cat-${cat}`).classList.add('bg-indigo-600', 'text-white');
+            document.getElementById(`cat-${cat}`).classList.remove('bg-gray-100', 'text-gray-600');
+            renderFoodGrid();
+        }
+
+        function addFoodToLog(id) {
+            const food = foodDatabase.find(f => f.id === id);
+            if (!food) return;
+
+            const timeString = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+            eatenLogs.unshift({ ...food, logId: Date.now(), time: timeString });
+            
+            localStorage.setItem('eatenLogs', JSON.stringify(eatenLogs));
+            updateBadge();
+            
+            // Brief visual feedback
+            const btn = event.currentTarget;
+            btn.classList.add('bg-emerald-600', 'text-white');
+            btn.innerHTML = '✓ บันทึก';
+            setTimeout(() => {
+                btn.classList.remove('bg-emerald-600', 'text-white');
+                btn.innerHTML = '<span>+</span> ทาน';
+            }, 1000);
+        }
+
+        function removeFoodLog(logId) {
+            eatenLogs = eatenLogs.filter(item => item.logId !== logId);
+            localStorage.setItem('eatenLogs', JSON.stringify(eatenLogs));
+            renderSummary();
+            updateBadge();
+        }
+
+        function resetDailyData() {
+            if (confirm('คุณชินอิจิ ต้องการรีเซ็ตบันทึกการทานอาหารของวันนี้ทั้งหมดไหมคะ?')) {
+                eatenLogs = [];
+                localStorage.removeItem('eatenLogs');
+                renderSummary();
+                updateBadge();
+            }
+        }
+
+        function updateBadge() {
+            const badge = document.getElementById('badge-count');
+            if (eatenLogs.length > 0) {
+                badge.textContent = eatenLogs.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        // =========================================================
+        // 5. DAILY SUMMARY & DASHBOARD
+        // =========================================================
+        function renderSummary() {
+            updateBadge();
+            const today = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+            document.getElementById('summaryDate').textContent = today;
+
+            let totalCal = 0, totalP = 0, totalC = 0, totalF = 0;
+            eatenLogs.forEach(item => {
+                totalCal += item.cal;
+                totalP += item.p;
+                totalC += item.c;
+                totalF += item.f;
+            });
+
+            const remainingCal = targetCalories - totalCal;
+            const percent = Math.min(Math.round((totalCal / targetCalories) * 100), 100);
+
+            document.getElementById('sumTargetCal').textContent = targetCalories.toLocaleString();
+            document.getElementById('sumEatenCal').textContent = totalCal.toLocaleString();
+            document.getElementById('sumRemainCal').textContent = remainingCal.toLocaleString();
+            
+            document.getElementById('calPercentText').textContent = `${percent}%`;
+            document.getElementById('calProgressBar').style.width = `${percent}%`;
+
+            if (totalCal > targetCalories) {
+                document.getElementById('calProgressBar').className = "bg-rose-500 h-3 rounded-full transition-all duration-500";
+            } else {
+                document.getElementById('calProgressBar').className = "bg-indigo-600 h-3 rounded-full transition-all duration-500";
+            }
+
+            document.getElementById('sumProtein').textContent = `${totalP}g`;
+            document.getElementById('sumCarbs').textContent = `${totalC}g`;
+            document.getElementById('sumFat').textContent = `${totalF}g`;
+
+            // Render Log List
+            const logContainer = document.getElementById('eatenLogList');
+            if (eatenLogs.length === 0) {
+                logContainer.innerHTML = `<p class="text-xs text-gray-400 text-center py-6">ยังไม่ได้บันทึกรายการอาหารวันนี้ค่ะคุณชินอิจิ</p>`;
+            } else {
+                logContainer.innerHTML = eatenLogs.map(item => `
+                    <div class="pt-2 flex justify-between items-center text-xs">
+                        <div>
+                            <p class="font-semibold text-gray-800">${item.name}</p>
+                            <p class="text-[10px] text-gray-400">${item.time} • P:${item.p}g C:${item.c}g F:${item.f}g</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="font-bold text-indigo-600">+${item.cal} kcal</span>
+                            <button onclick="removeFoodLog(${item.logId})" class="text-gray-300 hover:text-red-500 text-base">✕</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // =========================================================
+        // 6. PWA SERVICE WORKER SETUP
+        // =========================================================
+        let deferredPrompt;
         function setupPWA() {
-            // ลิงก์ไฟล์ manifest และ icon จริง
             document.getElementById('manifest-placeholder').href = './manifest.json';
             document.getElementById('apple-touch-icon-placeholder').href = './cal.png';
 
-            // ลงทะเบียน Service Worker จาก sw.js จริง
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Service Worker Registered Successfully'))
-                    .catch(err => console.error('Service Worker Registration Failed:', err));
+                    .then(() => console.log('PWA Service Worker Registered'))
+                    .catch(err => console.error('PWA SW Error:', err));
             }
 
-            // จัดการ Event ติดตั้ง PWA
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
@@ -293,12 +648,7 @@
                     if (!localStorage.getItem('installPromptShown')) {
                         document.getElementById('installPopup').classList.add('show');
                     }
-                }, 2000);
-            });
-
-            window.addEventListener('appinstalled', () => {
-                document.getElementById('installPopup').classList.remove('show');
-                localStorage.setItem('installPromptShown', 'true');
+                }, 3000);
             });
         }
     </script>
