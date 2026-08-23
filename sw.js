@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'calorie-tracker-v1.1';
+const CACHE_NAME = 'calorie-tracker-v1'; // ขยับเวอร์ชันเพื่อให้เบราว์เซอร์รู้ว่ามีไฟล์ใหม่
 const urlsToCache = [
   './',
   './index.html',
@@ -9,6 +9,7 @@ const urlsToCache = [
 
 // ติดตั้ง Service Worker
 self.addEventListener('install', event => {
+    self.skipWaiting(); // บังคับให้ Service Worker ตัวใหม่อัปเดตทำงานทันที
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
@@ -18,7 +19,7 @@ self.addEventListener('install', event => {
     );
 });
 
-// เปิดใช้งาน Service Worker
+// เปิดใช้งาน Service Worker และลบ Cache เก่า
 self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(cacheNames => {
@@ -29,31 +30,26 @@ self.addEventListener('activate', event => {
                     }
                 })
             );
-        })
+        }).then(() => self.clients.claim()) // เข้าควบคุมหน้าเว็บทันทีโดยไม่ต้องรอ Reload
     );
 });
 
-// ดักจับการร้องขอ
+// ดักจับการร้องขอข้อมูล (Fetch)
 self.addEventListener('fetch', event => {
     event.respondWith(
         caches.match(event.request)
             .then(response => {
-                // คืนค่าจาก cache ถ้ามี
                 if (response) {
                     return response;
                 }
                 
-                // ถ้าไม่มีใน cache ให้ fetch จาก network
                 return fetch(event.request).then(
                     response => {
-                        // ตรวจสอบว่า response ถูกต้อง
                         if (!response || response.status !== 200 || response.type !== 'basic') {
                             return response;
                         }
                         
-                        // Clone response
                         const responseToCache = response.clone();
-                        
                         caches.open(CACHE_NAME)
                             .then(cache => {
                                 cache.put(event.request, responseToCache);
