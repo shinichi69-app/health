@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
@@ -674,7 +674,7 @@
                         <div class="stats-grid" style="margin-top:10px;">
                             <div class="stat-card"><div class="value" id="hStreak">0</div><div class="label">🔥 วันต่อเนื่อง</div></div>
                             <div class="stat-card"><div class="value" id="hScore">0</div><div class="label">⭐ คะแนนสุขภาพ</div></div>
-                            <div class="stat-card"><div class="value"><button class="btn-sm btn-secondary" onclick="backupHealth()">💾 Export</button></div><div class="label">สำรองข้อมูล</div></div>
+                            <div class="stat-card"><div class="value" id="hTotalDays">0</div><div class="label">📅 วันบันทึก</div></div>
                         </div>
                     </div>
                 </div>
@@ -821,9 +821,9 @@
                     <div class="section">
                         <h2>📊 สถิติรวม</h2>
                         <div class="stats-grid">
-                            <div class="stat-card"><div class="value" id="totalDays">0</div><div class="label">วันบันทึก</div></div>
-                            <div class="stat-card"><div class="value" id="avgCal">0</div><div class="label">เฉลี่ย kcal/วัน</div></div>
-                            <div class="stat-card"><div class="value" id="bestDay">0</div><div class="label">วันสูงสุด</div></div>
+                            <div class="stat-card"><div class="value" id="histTotalDays">0</div><div class="label">วันบันทึก</div></div>
+                            <div class="stat-card"><div class="value" id="histAvgCal">0</div><div class="label">เฉลี่ย kcal/วัน</div></div>
+                            <div class="stat-card"><div class="value" id="histBestDay">0</div><div class="label">วันสูงสุด</div></div>
                         </div>
                     </div>
                 </div>
@@ -910,7 +910,6 @@
                 btn.classList.toggle('active', i === index);
             });
 
-            // Update badge
             updateBadge();
         }
 
@@ -927,12 +926,6 @@
         // Bottom nav click
         document.querySelectorAll('.bottom-nav button').forEach((btn, i) => {
             btn.addEventListener('click', () => goToPage(i));
-        });
-
-        // Keyboard shortcut (optional)
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft' && currentPage > 0) goToPage(currentPage - 1);
-            if (e.key === 'ArrowRight' && currentPage < 4) goToPage(currentPage + 1);
         });
 
         // ============================================
@@ -1145,7 +1138,7 @@
         function refreshAll() {
             // Reset day
             if (hp.date !== td()) {
-                if (hp.date) hp.history.push({ d: hp.date, c: foodList.reduce((s, x) => s + x.calories, 0) });
+                if (hp.date) hp.history.push({ d: hp.date, c: foodList.reduce((s, x) => s + x.calories, 0), w: hp.water || 0 });
                 hp.date = td();
                 hp.water = 0;
                 hp.ex = [];
@@ -1213,6 +1206,10 @@
             ));
             document.getElementById('hScore').textContent = score;
 
+            // Total days on dashboard
+            const totalDays = hp.history.filter(h => h.c > 0).length + (c > 0 ? 1 : 0);
+            document.getElementById('hTotalDays').textContent = totalDays;
+
             // === WATER PAGE ===
             document.getElementById('waterTarget').textContent = wt || 8;
             document.getElementById('waterIcons').textContent = hp.water > 0 ? '💧'.repeat(Math.min(12, hp.water)) : '💧 ยังไม่ได้ดื่ม';
@@ -1260,28 +1257,19 @@
                     </div>
                 `).join('');
 
-            const totalDays = hp.history.filter(h => h.c > 0).length + (c > 0 ? 1 : 0);
-            const avgCal = totalDays > 0 ? Math.round(hp.history.filter(h => h.c > 0).reduce((s, h) => s + h.c, 0) / totalDays) : 0;
-            const bestDay = hp.history.length > 0 ? Math.max(...hp.history.map(h => h.c || 0), c) : 0;
-            document.getElementById('totalDays').textContent = totalDays;
-            document.getElementById('avgCal').textContent = avgCal;
-            document.getElementById('bestDay').textContent = bestDay;
+            const histTotalDays = hp.history.filter(h => h.c > 0).length + (c > 0 ? 1 : 0);
+            const histAvgCal = histTotalDays > 0 ? Math.round(hp.history.filter(h => h.c > 0).reduce((s, h) => s + h.c, 0) / histTotalDays) : 0;
+            const histBestDay = hp.history.length > 0 ? Math.max(...hp.history.map(h => h.c || 0), c) : 0;
+            document.getElementById('histTotalDays').textContent = histTotalDays;
+            document.getElementById('histAvgCal').textContent = histAvgCal;
+            document.getElementById('histBestDay').textContent = histBestDay;
 
-            // Update badge
             updateBadge();
         }
 
         // ============================================
-        // BACKUP / CLEAR
+        // CLEAR
         // ============================================
-        function backupHealth() {
-            const a = document.createElement('a');
-            const data = { profile: userProfile, target: dailyCalorieTarget, foods: foodList, health: hp };
-            a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
-            a.download = `calorie-backup-${td()}.json`;
-            a.click();
-        }
-
         function clearAllData() {
             if (confirm('ล้างข้อมูลทั้งหมด? ไม่สามารถย้อนกลับได้')) {
                 localStorage.removeItem('calorieTrackerData');
@@ -1386,7 +1374,6 @@
             refreshAll();
             goToPage(0);
 
-            // Auto-save profile
             ['gender', 'age', 'weight', 'height', 'activity'].forEach(id => {
                 document.getElementById(id).addEventListener('change', () => {
                     userProfile = {
