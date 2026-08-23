@@ -4,6 +4,7 @@ const urlsToCache = [
     '/index.html',
     '/app.js',
     '/manifest.json'
+    '/cal.png'
 ];
 
 // ติดตั้ง Service Worker
