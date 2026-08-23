@@ -4,8 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>คำนวณแคลอรี่ - Calorie Tracker</title>
-    <link rel="manifest" href="data:application/json;base64,ewogICAgIm5hbWUiOiAi4LmE4LiX4Lii4LmMIOC4oOC5gOC4reC4suC5gOC4l+C4suC5iCIsCiAgICAic2hvcnRfbmFtZSI6ICJDYWxvcmllVHJhY2tlciIsCiAgICAiZGVzY3JpcHRpb24iOiAi4LmE4LiX4Lii4LmMIOC4oOC5gOC4reC4suC5gOC4l+C4suC5iOC4suC4o+C4seC5guC4muC4suC4oOC5jCDguJfguLHguIjguK3guKPguYjguJfguYjguK3guKPguLHguJkiLAogICAgInN0YXJ0X3VybCI6ICIvIiwKICAgICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICAgImJhY2tncm91bmRfY29sb3IiOiAiI2ZmZmZmZiIsCiAgICAidGhlbWVfY29sb3IiOiAiIzRDQUY1MCIsCiAgICAiaWNvbnMiOiBbCiAgICAgICAgewogICAgICAgICAgICAic3JjIjogImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBTUFBQUFEQ0FZQUFBQ2RKa2pBQUFBQUJKUlU1RXJrSmdnZz09IiwKICAgICAgICAgICAgInNpemVzIjogIjE5MngxOTIiLAogICAgICAgICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICAgICAgfQogICAgXQp9">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" id="manifest-placeholder">
     <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Calorie Tracker">
+    <link rel="apple-touch-icon" id="apple-touch-icon-placeholder">
+    
     <style>
         * {
             margin: 0;
@@ -234,6 +241,71 @@
             text-align: center;
         }
 
+        /* Popup ติดตั้งแอพ */
+        .install-popup {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            z-index: 9999;
+            max-width: 90%;
+            width: 400px;
+            text-align: center;
+        }
+
+        .install-popup.show {
+            display: block;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translate(-50%, 100%);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+        }
+
+        .install-popup h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .install-popup p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .install-popup .install-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .install-popup .cancel-btn {
+            background: #f44336;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
         @media (max-width: 600px) {
             .container {
                 padding: 15px;
@@ -342,10 +414,19 @@
         </div>
     </div>
 
+    <!-- Popup ติดตั้งแอพ -->
+    <div id="installPopup" class="install-popup">
+        <h3>📱 ติดตั้งแอพ Calorie Tracker</h3>
+        <p>ติดตั้งแอพเพื่อใช้งานแบบเต็มประสิทธิภาพ แม้ไม่มีอินเทอร์เน็ต!</p>
+        <button class="install-btn" onclick="installApp()">ติดตั้งเลย</button>
+        <button class="cancel-btn" onclick="closeInstallPopup()">ไว้ทีหลัง</button>
+    </div>
+
     <script>
         // ข้อมูลอาหาร (เก็บใน LocalStorage)
         let foodList = [];
         let dailyCalorieTarget = 0;
+        let deferredPrompt = null;
 
         // ฐานข้อมูลอาหารยอดนิยม (ชื่ออาหาร: แคลอรี่ต่อหน่วยบริโภค)
         const foodDatabase = {
@@ -468,7 +549,187 @@
         window.onload = function() {
             loadData();
             setupFoodSearch();
+            setupPWA();
         };
+
+        // ตั้งค่า PWA
+        function setupPWA() {
+            // สร้าง Manifest แบบ Dynamic
+            const manifestData = {
+                name: "เครื่องคำนวณแคลอรี่",
+                short_name: "CalorieTracker",
+                description: "แอพคำนวณแคลอรี่ที่ควรได้รับในแต่ละวัน",
+                start_url: window.location.href,
+                display: "standalone",
+                background_color: "#ffffff",
+                theme_color: "#4CAF50",
+                icons: [
+                    {
+                        src: createIcon(192),
+                        sizes: "192x192",
+                        type: "image/png"
+                    },
+                    {
+                        src: createIcon(512),
+                        sizes: "512x512",
+                        type: "image/png"
+                    }
+                ]
+            };
+
+            // สร้าง Blob URL สำหรับ manifest
+            const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
+            const manifestURL = URL.createObjectURL(manifestBlob);
+            document.getElementById('manifest-placeholder').href = manifestURL;
+
+            // สร้าง Icon สำหรับ Apple Touch
+            const appleIcon = createIcon(192);
+            document.getElementById('apple-touch-icon-placeholder').href = appleIcon;
+
+            // ลงทะเบียน Service Worker
+            if ('serviceWorker' in navigator) {
+                // สร้าง Service Worker แบบ Inline
+                const swCode = `
+                    const CACHE_NAME = 'calorie-tracker-v1';
+                    const urlsToCache = [
+                        '${window.location.href}'
+                    ];
+
+                    self.addEventListener('install', event => {
+                        event.waitUntil(
+                            caches.open(CACHE_NAME)
+                                .then(cache => {
+                                    console.log('Opened cache');
+                                    return cache.addAll(urlsToCache);
+                                })
+                        );
+                    });
+
+                    self.addEventListener('activate', event => {
+                        event.waitUntil(
+                            caches.keys().then(cacheNames => {
+                                return Promise.all(
+                                    cacheNames.map(cacheName => {
+                                        if (cacheName !== CACHE_NAME) {
+                                            return caches.delete(cacheName);
+                                        }
+                                    })
+                                );
+                            })
+                        );
+                    });
+
+                    self.addEventListener('fetch', event => {
+                        event.respondWith(
+                            caches.match(event.request)
+                                .then(response => {
+                                    if (response) {
+                                        return response;
+                                    }
+                                    return fetch(event.request).then(
+                                        response => {
+                                            if (!response || response.status !== 200 || response.type !== 'basic') {
+                                                return response;
+                                            }
+                                            const responseToCache = response.clone();
+                                            caches.open(CACHE_NAME)
+                                                .then(cache => {
+                                                    cache.put(event.request, responseToCache);
+                                                });
+                                            return response;
+                                        }
+                                    );
+                                })
+                        );
+                    });
+                `;
+
+                const swBlob = new Blob([swCode], {type: 'application/javascript'});
+                const swURL = URL.createObjectURL(swBlob);
+                
+                navigator.serviceWorker.register(swURL)
+                    .then(registration => {
+                        console.log('Service Worker ลงทะเบียนสำเร็จ:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker ลงทะเบียนล้มเหลว:', error);
+                    });
+            }
+
+            // ดักจับเหตุการณ์ beforeinstallprompt
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                // แสดง Popup อัตโนมัติหลังจาก 3 วินาที
+                setTimeout(() => {
+                    if (!localStorage.getItem('installPromptShown')) {
+                        showInstallPopup();
+                    }
+                }, 3000);
+            });
+
+            // ตรวจสอบว่าแอพถูกติดตั้งแล้วหรือไม่
+            window.addEventListener('appinstalled', () => {
+                console.log('แอพถูกติดตั้งแล้ว');
+                closeInstallPopup();
+                localStorage.setItem('appInstalled', 'true');
+            });
+        }
+
+        // สร้าง Icon แบบ Canvas
+        function createIcon(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // วาดพื้นหลัง
+            ctx.fillStyle = '#4CAF50';
+            ctx.fillRect(0, 0, size, size);
+            
+            // วาดรูปแอปเปิ้ล
+            ctx.fillStyle = '#FF5722';
+            ctx.beginPath();
+            ctx.arc(size * 0.5, size * 0.5, size * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // วาดใบไม้
+            ctx.fillStyle = '#8BC34A';
+            ctx.beginPath();
+            ctx.ellipse(size * 0.5, size * 0.3, size * 0.1, size * 0.05, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            return canvas.toDataURL('image/png');
+        }
+
+        // แสดง Popup ติดตั้ง
+        function showInstallPopup() {
+            if (!localStorage.getItem('appInstalled')) {
+                document.getElementById('installPopup').classList.add('show');
+                localStorage.setItem('installPromptShown', 'true');
+            }
+        }
+
+        // ปิด Popup
+        function closeInstallPopup() {
+            document.getElementById('installPopup').classList.remove('show');
+        }
+
+        // ติดตั้งแอพ
+        async function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const result = await deferredPrompt.userChoice;
+                if (result.outcome === 'accepted') {
+                    console.log('ผู้ใช้ยอมรับการติดตั้ง');
+                } else {
+                    console.log('ผู้ใช้ปฏิเสธการติดตั้ง');
+                }
+                deferredPrompt = null;
+            }
+            closeInstallPopup();
+        }
 
         function calculateBMR() {
             const gender = document.getElementById('gender').value;
