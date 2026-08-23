@@ -2,9 +2,127 @@
 let foodList = [];
 let dailyCalorieTarget = 0;
 
+// ฐานข้อมูลอาหารยอดนิยม (ชื่ออาหาร: แคลอรี่ต่อหน่วยบริโภค)
+const foodDatabase = {
+    // อาหารจานเดียว
+    "ข้าวผัดกุ้ง": 350,
+    "ข้าวผัดหมู": 400,
+    "ข้าวมันไก่": 550,
+    "ข้าวขาหมู": 600,
+    "ข้าวราดแกง": 450,
+    "ข้าวหน้าเป็ด": 500,
+    "ข้าวหมูแดง": 450,
+    "ข้าวหมูกรอบ": 550,
+    "ข้าวคลุกกะปิ": 500,
+    "ข้าวผัดกระเพรา": 400,
+    "ข้าวผัดคะน้า": 350,
+    "ข้าวต้ม": 200,
+    "โจ๊ก": 250,
+    "ก๋วยเตี๋ยว": 350,
+    "ก๋วยเตี๋ยวต้มยำ": 300,
+    "ก๋วยเตี๋ยวเย็นตาโฟ": 400,
+    "ผัดไทย": 450,
+    "ผัดซีอิ๊ว": 500,
+    "ส้มตำ": 150,
+    "ส้มตำปูปลาร้า": 200,
+    "ต้มยำกุ้ง": 200,
+    "แกงเขียวหวาน": 300,
+    "แกงมัสมั่น": 350,
+    "พะแนง": 350,
+    "ผัดกะเพรา": 250,
+    
+    // อาหารจานเดียว (Fast Food)
+    "เบอร์เกอร์": 500,
+    "พิซซ่า": 300,
+    "เฟรนช์ฟรายส์": 350,
+    "ไก่ทอด": 350,
+    "แซนวิช": 250,
+    "สปาเก็ตตี้": 400,
+    "มักกะโรนี": 350,
+    "สเต็ก": 500,
+    "ซูชิ": 300,
+    "ราเมน": 450,
+    
+    // อาหารเช้า
+    "ไข่เจียว": 200,
+    "ไข่ต้ม": 75,
+    "ไข่ดาว": 90,
+    "ไข่คน": 100,
+    "ขนมปัง": 80,
+    "ขนมปังปิ้ง": 150,
+    "ซีเรียล": 150,
+    "โยเกิร์ต": 100,
+    "นมสด": 120,
+    "กาแฟ": 100,
+    "ชา": 50,
+    
+    // ผลไม้
+    "แอปเปิ้ล": 95,
+    "กล้วย": 105,
+    "ส้ม": 60,
+    "องุ่น": 70,
+    "แตงโม": 46,
+    "มะม่วง": 60,
+    "มะละกอ": 55,
+    "สับปะรด": 50,
+    "ฝรั่ง": 68,
+    "ทุเรียน": 180,
+    "มังคุด": 73,
+    "เงาะ": 80,
+    
+    // เครื่องดื่ม
+    "น้ำเปล่า": 0,
+    "น้ำอัดลม": 150,
+    "น้ำผลไม้": 120,
+    "ชาไข่มุก": 350,
+    "กาแฟเย็น": 200,
+    "ชาเขียว": 180,
+    "นมช็อกโกแลต": 200,
+    "เบียร์": 150,
+    "ไวน์": 120,
+    
+    // ขนม
+    "ไอศครีม": 200,
+    "เค้ก": 350,
+    "คุกกี้": 80,
+    "ช็อกโกแลต": 150,
+    "ขนมไทย": 200,
+    "โดนัท": 250,
+    "มันฝรั่งทอด": 150,
+    
+    // อาหารอีสาน
+    "ลาบ": 200,
+    "น้ำตก": 200,
+    "ตำแตง": 100,
+    "ตำผลไม้": 120,
+    "ไก่ย่าง": 250,
+    "หมูย่าง": 300,
+    "ปลาเผา": 250,
+    
+    // อาหารเหนือ
+    "ข้าวซอย": 400,
+    "แกงฮังเล": 350,
+    "น้ำพริกหนุ่ม": 100,
+    "แคบหมู": 200,
+    "ไส้อั่ว": 250,
+    
+    // อาหารใต้
+    "แกงไตปลา": 300,
+    "ผัดสะตอ": 250,
+    "ไก่ทอดหาดใหญ่": 400,
+    "ข้าวยำ": 350,
+    
+    // อาหารญี่ปุ่น
+    "ข้าวหน้าปลา": 350,
+    "เทมปุระ": 400,
+    "โซบะ": 300,
+    "อุด้ง": 350
+};
+
 // โหลดข้อมูลจาก LocalStorage เมื่อเปิดแอพ
 window.onload = function() {
     loadData();
+    setupFoodSearch();
 };
 
 function calculateBMR() {
@@ -35,6 +153,56 @@ function calculateBMR() {
     saveData();
 }
 
+// ตั้งค่าระบบค้นหาอาหาร
+function setupFoodSearch() {
+    const foodNameInput = document.getElementById('foodName');
+    const searchResults = document.getElementById('searchResults');
+    
+    foodNameInput.addEventListener('input', function() {
+        const searchTerm = this.value.trim().toLowerCase();
+        
+        if (searchTerm.length === 0) {
+            searchResults.style.display = 'none';
+            document.getElementById('foodCalories').value = '';
+            return;
+        }
+        
+        // ค้นหาอาหารที่ตรงกับคำค้น
+        const matches = Object.keys(foodDatabase)
+            .filter(food => food.toLowerCase().includes(searchTerm))
+            .slice(0, 10); // แสดงผลสูงสุด 10 รายการ
+        
+        if (matches.length > 0) {
+            searchResults.innerHTML = '';
+            matches.forEach(food => {
+                const div = document.createElement('div');
+                div.className = 'search-result-item';
+                div.innerHTML = `
+                    <span>${food}</span>
+                    <span class="food-calories">${foodDatabase[food]} kcal</span>
+                `;
+                div.onclick = function() {
+                    document.getElementById('foodName').value = food;
+                    document.getElementById('foodCalories').value = foodDatabase[food];
+                    searchResults.style.display = 'none';
+                };
+                searchResults.appendChild(div);
+            });
+            searchResults.style.display = 'block';
+        } else {
+            searchResults.innerHTML = '<div class="no-result">ไม่พบอาหารที่ค้นหา กรุณากรอกแคลอรี่เอง</div>';
+            searchResults.style.display = 'block';
+        }
+    });
+    
+    // ซ่อนผลการค้นหาเมื่อคลิกที่อื่น
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#foodName') && !e.target.closest('#searchResults')) {
+            searchResults.style.display = 'none';
+        }
+    });
+}
+
 function addFood() {
     const foodName = document.getElementById('foodName').value.trim();
     const foodCalories = parseInt(document.getElementById('foodCalories').value);
@@ -44,15 +212,27 @@ function addFood() {
         return;
     }
 
-    foodList.push({
-        name: foodName,
-        calories: foodCalories,
-        timestamp: new Date().toISOString()
-    });
+    // ตรวจสอบว่าเป็นอาหารในฐานข้อมูลหรือไม่
+    if (foodDatabase[foodName]) {
+        // ถ้าเป็นอาหารในฐานข้อมูล ใช้แคลอรี่จากฐานข้อมูล
+        foodList.push({
+            name: foodName,
+            calories: foodDatabase[foodName],
+            timestamp: new Date().toISOString()
+        });
+    } else {
+        // ถ้าไม่ใช่ ใช้แคลอรี่ที่ผู้ใช้กรอกเอง
+        foodList.push({
+            name: foodName,
+            calories: foodCalories,
+            timestamp: new Date().toISOString()
+        });
+    }
 
     // เคลียร์ฟอร์ม
     document.getElementById('foodName').value = '';
     document.getElementById('foodCalories').value = '';
+    document.getElementById('searchResults').style.display = 'none';
 
     updateFoodList();
     updateSummary();
