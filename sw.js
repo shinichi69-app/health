@@ -1,10 +1,10 @@
 ﻿const CACHE_NAME = 'calorie-tracker-v1.1';
 const urlsToCache = [
-    '/',
-    '/index.html',
-    '/app.js',
-    '/manifest.json'
-    '/cal.png'
+  './',
+  './index.html',
+  './app.js',
+  './manifest.json',
+  './cal.png'
 ];
 
 // ติดตั้ง Service Worker
